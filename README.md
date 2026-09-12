@@ -1,8 +1,10 @@
-# Maldives Building Regulation Navigator
+# Maldives Building Regulations Hub
 
-A static navigator, rule checker and architectural checklist for the Maldives regulation on building in islands or lagoons without planning rules.
+A public, unofficial hub for accessing Maldives building regulations, guidance, checking tools and architectural checklists.
 
 Prepared by Arkido Studio.
+
+Translations, transcriptions, summaries and consolidated provisions may have been prepared or synthesized with assistance from AI models. Official Dhivehi publications remain authoritative. Corrections can be reported through this repository's issue tracker.
 
 ## Local preview
 

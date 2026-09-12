@@ -84,11 +84,12 @@ h1 { font-family: '"'"'Fraunces'"'"', serif; font-weight:500; font-size:32px; co
 @media (max-width:640px) { .file { grid-template-columns:1fr; } }
 </style>
 <nav class="topnav">
-  <div class="brand">Maldives Building Regulation Navigator</div>
+  <div class="brand">Maldives Building Regulations Hub</div>
   <a href="building-reg.html">Guideline</a>
   <a href="islands-checker.html">Rules Checker</a>
   <a href="checklist.html">Checklist</a>
   <a class="on" href="#">Downloads</a>
+  <a href="disclaimer.html">Disclaimer</a>
   <div class="theme-controls">
     <div class="grp" id="theme-name-picker">
       <button data-name="classic">Classic</button>
@@ -108,6 +109,7 @@ h1 { font-family: '"'"'Fraunces'"'"', serif; font-weight:500; font-size:32px; co
   <div class="sub">Source files used to build this navigator, plus a JSON export of your current project state.</div>
 </header>
 <div id="content"></div>
+<footer class="site-footer">An independent, unofficial resource by <strong>Arkido Studio</strong>. AI-assisted content may contain errors. <a href="disclaimer.html">Read the disclaimer</a> · <a href="https://github.com/arkidostudio/maldives-building-regulations/issues/new?template=correction.yml" target="_blank" rel="noopener">Report a correction</a></footer>
 </div>
 <script>
 const FILES = [

@@ -195,6 +195,13 @@ mark { background:color-mix(in srgb,var(--accent),transparent 78%); color:var(--
 .checklist-nav a:hover,.checklist-nav a.active { color:var(--ink); background:var(--accent-soft); }
 .site-footer { margin-top:64px; padding:22px 0; border-top:1px solid var(--line); color:var(--muted); font-size:12px; text-align:center; }
 .site-footer strong { color:var(--ink-soft); font-weight:600; }
+.site-footer a { color:var(--accent); text-decoration:none; }
+.site-footer a:hover { text-decoration:underline; }
+.disclaimer-card { padding:28px; border:1px solid var(--line); border-radius:16px; background:var(--panel); box-shadow:var(--ui-shadow); }
+.disclaimer-card h2 { margin:28px 0 8px; color:var(--ink); }
+.disclaimer-card h2:first-child { margin-top:0; }
+.disclaimer-card p { max-width:72ch; }
+.correction-button { display:inline-block; margin-top:12px; padding:10px 16px; border-radius:9px; color:#fff; background:linear-gradient(90deg,var(--accent),var(--accent-2)); text-decoration:none; font-weight:600; }
 
 @media (min-width:1401px) {
   body:has(.checklist-nav) .wrap { margin-left:calc(50vw - 316px); margin-right:0; }
