@@ -1,0 +1,1399 @@
+<meta charset="utf-8">
+<title>Islands Building Rules Checker</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --ground: #f4f1e9;
+  --panel: #fbf9f2;
+  --ink: #211f27;
+  --ink-soft: #524f5c;
+  --muted: #918d95;
+  --line: #e5dfd0;
+  --line-strong: #cec7b3;
+  --accent: #1f3b5c;
+  --accent-soft: #e8eef6;
+  --bad: #7d3b3b;
+  --bad-soft: #f3e6e4;
+  --ok: #3d5f43;
+  --ok-soft: #e6ede4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #15171c;
+    --panel: #1e2128;
+    --ink: #ecebe4;
+    --ink-soft: #b8bcc4;
+    --muted: #85889a;
+    --line: #2b2f38;
+    --line-strong: #3a3f4a;
+    --accent: #8bb3ea;
+    --accent-soft: #22314b;
+    --bad: #dc9a97;
+    --bad-soft: #3a2427;
+    --ok: #a3c9a8;
+    --ok-soft: #22322a;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #15171c;
+  --panel: #1e2128;
+  --ink: #ecebe4;
+  --ink-soft: #b8bcc4;
+  --muted: #85889a;
+  --line: #2b2f38;
+  --line-strong: #3a3f4a;
+  --accent: #8bb3ea;
+  --accent-soft: #22314b;
+  --bad: #dc9a97;
+  --bad-soft: #3a2427;
+  --ok: #a3c9a8;
+  --ok-soft: #22322a;
+}
+/* Modern theme */
+:root[data-theme-name="modern"] {
+  --ground: #fafafa;
+  --panel: #ffffff;
+  --ink: #0a0a0a;
+  --ink-soft: #404040;
+  --muted: #737373;
+  --line: #e5e5e5;
+  --line-strong: #d4d4d4;
+  --accent: #171717;
+  --accent-soft: #f5f5f5;
+  --bad: #991b1b;
+  --bad-soft: #fef2f2;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme-name="modern"]:not([data-theme="light"]) {
+    --ground: #0a0a0a;
+    --panel: #171717;
+    --ink: #fafafa;
+    --ink-soft: #a3a3a3;
+    --muted: #737373;
+    --line: #262626;
+    --line-strong: #404040;
+    --accent: #fafafa;
+    --accent-soft: #262626;
+    --bad: #f87171;
+    --bad-soft: #2a1616;
+  }
+}
+:root[data-theme-name="modern"][data-theme="dark"] {
+  --ground: #0a0a0a;
+  --panel: #171717;
+  --ink: #fafafa;
+  --ink-soft: #a3a3a3;
+  --muted: #737373;
+  --line: #262626;
+  --line-strong: #404040;
+  --accent: #fafafa;
+  --accent-soft: #262626;
+  --bad: #f87171;
+  --bad-soft: #2a1616;
+}
+:root[data-theme-name="modern"] body,
+:root[data-theme-name="modern"] h1,
+:root[data-theme-name="modern"] h2,
+:root[data-theme-name="modern"] h3,
+:root[data-theme-name="modern"] .form h2,
+:root[data-theme-name="modern"] .bot-title,
+:root[data-theme-name="modern"] .section-head,
+:root[data-theme-name="modern"] .rule-title,
+:root[data-theme-name="modern"] .qr-title,
+:root[data-theme-name="modern"] .big-num,
+:root[data-theme-name="modern"] .summary h3,
+:root[data-theme-name="modern"] .brand { font-family: 'Inter', sans-serif !important; letter-spacing: -0.01em; }
+:root[data-theme-name="modern"] h1 { font-weight: 700; }
+:root[data-theme-name="modern"] .rule, :root[data-theme-name="modern"] .form, :root[data-theme-name="modern"] .summary, :root[data-theme-name="modern"] .quickref a { border-radius: 4px; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink-soft); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 32px 100px; }
+header { margin-bottom: 32px; }
+.eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+h1 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 34px; color: var(--ink); margin: 0 0 8px; letter-spacing: -0.015em; line-height: 1.1; }
+.sub { color: var(--ink-soft); max-width: 60ch; }
+.doc-link { display: inline-flex; gap: 6px; align-items: center; margin-top: 10px; color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 500; }
+.doc-link:hover { text-decoration: underline; }
+
+.layout { display: grid; grid-template-columns: 380px 1fr; gap: 28px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+.form {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 22px 24px;
+  position: sticky;
+  top: 20px;
+}
+.form h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; color: var(--ink); margin: 0 0 14px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.field input[type="number"], .field select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--ground);
+  color: var(--ink);
+  border-radius: 8px;
+  font: inherit;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field .row { display: flex; gap: 6px; align-items: center; }
+.unit { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden; }
+.unit button { background: transparent; border: none; padding: 3px 8px; font: inherit; font-size: 11px; color: var(--muted); cursor: pointer; }
+.unit button.on { background: var(--accent); color: #fff; }
+:root[data-theme="dark"] .unit button.on, :root:not([data-theme="light"]) .unit button.on { color: var(--ground); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .unit button.on { color: var(--ground); } }
+.check { display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; }
+.check input { width: 16px; height: 16px; }
+.check span { font-size: 13.5px; color: var(--ink-soft); text-transform: none; letter-spacing: 0; font-weight: 400; }
+.reset { margin-top: 14px; background: none; border: 1px solid var(--line-strong); color: var(--ink-soft); padding: 6px 12px; border-radius: 6px; font: inherit; font-size: 12px; cursor: pointer; }
+.reset:hover { background: var(--ground); }
+
+.results { min-height: 400px; }
+.summary {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+}
+.summary h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; margin: 0 0 10px; color: var(--ink); }
+.big-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 30px; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1; }
+.big-num .feet { font-size: 18px; color: var(--ink-soft); }
+.big-note { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.height-basis { margin: 14px 0 0; padding-left: 20px; color: var(--ink-soft); font-size: 13px; }
+.height-basis li { margin: 5px 0; }
+.height-basis .binding { color: var(--ink); font-weight: 600; }
+
+.rule {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+.rule.warn { border-left-color: var(--bad); background: var(--bad-soft); }
+.rule.info { border-left-color: var(--muted); }
+.rule.ext { border-left-color: #7a5b1c; background: #f7edd6; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .rule.ext { background: #372c14; border-left-color: #d0b070; } }
+:root[data-theme="dark"] .rule.ext { background: #372c14; border-left-color: #d0b070; }
+:root[data-theme-name="modern"] .rule.ext { background: #fefce8; border-left-color: #854d0e; }
+:root[data-theme-name="modern"][data-theme="dark"] .rule.ext { background: #2a2214; border-left-color: #fbbf24; }
+.rule .ext-tag { display: inline-block; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #7a5b1c; background: rgba(0,0,0,0.05); padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle; font-weight: 600; }
+:root[data-theme="dark"] .rule .ext-tag, :root:not([data-theme="light"]) .rule .ext-tag { color: #d0b070; background: rgba(255,255,255,0.06); }
+.rule-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+.rule-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); }
+.rule-ref { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.rule-ref a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.rule-ref a:hover { text-decoration: underline; }
+.rule-body { font-size: 13.5px; }
+.rule-body strong { color: var(--ink); }
+.empty { padding: 40px; text-align: center; color: var(--muted); font-style: italic; }
+
+.section-head { font-family: 'Fraunces', serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 20px 0 8px; }
+.section-head:first-child { margin-top: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 12px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 16px; font-size: 12.5px; }
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot { width: 4px; height: 16px; border-radius: 2px; }
+.legend-dot.warn { background: var(--bad); }
+.legend-dot.info { background: var(--muted); }
+.legend-dot.std { background: var(--accent); }
+details.not-req { margin-top: 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 0; overflow: hidden; }
+details.not-req summary { padding: 12px 16px; cursor: pointer; font-family: 'Fraunces', serif; font-size: 13px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; user-select: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+details.not-req summary::-webkit-details-marker { display: none; }
+details.not-req summary::after { content: "+"; font-size: 18px; font-weight: 400; color: var(--muted); }
+details.not-req[open] summary::after { content: "−"; }
+details.not-req summary:hover { color: var(--ink-soft); }
+details.not-req .nr-inner { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+.nr-item { padding: 10px 12px; background: var(--ground); border-radius: 8px; font-size: 13px; }
+.nr-item .nr-title { color: var(--ink-soft); font-weight: 500; }
+.nr-item .nr-why { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.nr-item .nr-ref { color: var(--muted); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 6px; }
+.nr-item .nr-ref a { color: var(--accent); text-decoration: none; }
+.topnav { position: sticky; top: 0; z-index: 90; background: var(--panel); border-bottom: 1px solid var(--line); padding: 12px 32px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; box-shadow: 0 8px 28px rgba(20, 30, 50, .08); }
+.topnav .brand { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); margin-right: 6px; }
+.topnav a { color: var(--ink-soft); text-decoration: none; font-size: 13px; padding: 4px 2px; border-bottom: 2px solid transparent; }
+.topnav a:hover { color: var(--ink); }
+.topnav a.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.topnav .theme-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.topnav .theme-controls .grp { display: flex; border: 1px solid var(--line-strong); border-radius: 5px; overflow: hidden; }
+.topnav .theme-controls .grp button { background: transparent; border: none; color: var(--muted); font: inherit; font-size: 11px; padding: 4px 8px; cursor: pointer; }
+.topnav .theme-controls .grp button.on { background: var(--accent); color: var(--panel); }
+:root[data-theme-name="modern"] { --ground:#f6f7fb; --panel:#fff; --ink:#111827; --ink-soft:#4b5563; --muted:#7c8493; --line:#e5e7eb; --line-strong:#cbd5e1; --accent:#4f46e5; --accent-soft:#eef2ff; --bad:#b42318; --bad-soft:#fff1f0; --ok:#15803d; --ok-soft:#effcf3; }
+:root[data-theme-name="modern"][data-theme="dark"] { --ground:#090c14; --panel:#111827; --ink:#f8fafc; --ink-soft:#cbd5e1; --muted:#8993a4; --line:#263244; --line-strong:#3c4a60; --accent:#a5b4fc; --accent-soft:#202a52; --bad:#fda29b; --bad-soft:#3b1d24; --ok:#86efac; --ok-soft:#173226; }
+@media (prefers-color-scheme: dark) { :root[data-theme-name="modern"]:not([data-theme="light"]) { --ground:#090c14; --panel:#111827; --ink:#f8fafc; --ink-soft:#cbd5e1; --muted:#8993a4; --line:#263244; --line-strong:#3c4a60; --accent:#a5b4fc; --accent-soft:#202a52; --bad:#fda29b; --bad-soft:#3b1d24; --ok:#86efac; --ok-soft:#173226; } }
+.form, .summary, .rule, .legend, details.not-req, button, input, select { transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.form, .summary { box-shadow: 0 14px 36px rgba(20, 30, 50, .07); }
+.rule:hover { transform: translateY(-1px); box-shadow: 0 9px 24px rgba(20, 30, 50, .07); }
+/* Side panel — pushes content aside (not overlay) */
+:root { --panel-w: 460px; }
+body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s ease; }
+@media (max-width: 950px) { body.has-panel { padding-right: 0; } }
+#side-panel { position: fixed; top: 0; right: 0; width: var(--panel-w); max-width: 100vw; height: 100vh; background: var(--panel); border-left: 1px solid var(--line); z-index: 100; transform: translateX(100%); transition: transform 0.25s ease; display: flex; flex-direction: column; }
+#side-panel.open { transform: translateX(0); }
+#side-panel-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--accent-soft); flex-shrink: 0; }
+#side-panel-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); }
+#side-panel-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 2px 8px; border-radius: 6px; }
+#side-panel-close:hover { background: var(--panel); color: var(--ink); }
+#side-panel-body { flex: 1; overflow-y: auto; padding: 20px 22px; color: var(--ink-soft); font-size: 14px; line-height: 1.65; }
+#side-panel-body h2 { font-family: 'Fraunces', serif; color: var(--ink); font-size: 20px; margin: 0 0 12px; font-weight: 600; letter-spacing: -0.005em; }
+#side-panel-body .art-num { font-family: 'Fraunces', serif; color: var(--accent); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+#side-panel-body p { margin: 8px 0; }
+#side-panel-body ol, #side-panel-body ul { margin: 8px 0; padding-left: 22px; }
+#side-panel-body ol ol, #side-panel-body ul ol, #side-panel-body ol ul { padding-left: 30px; }
+#side-panel-body li { margin: 4px 0; }
+#side-panel-body strong { color: var(--ink); }
+#side-panel-body table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 12px 0; }
+#side-panel-body th, #side-panel-body td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+#side-panel-body th { color: var(--ink); font-weight: 600; }
+#side-panel-body code { background: var(--ground); padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+#side-panel-body blockquote { margin: 10px 0; padding: 8px 12px; border-left: 3px solid var(--line-strong); background: var(--ground); border-radius: 0 6px 6px 0; font-style: italic; font-size: 13px; }
+#side-panel-body .amend { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; color: var(--accent); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; margin: 0 2px; vertical-align: middle; }
+#side-panel-body .calc { display: none; }
+#side-panel-body .subarticle { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+#side-panel-body .relevant-clause { background: var(--accent-soft); border-radius: 5px; outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 600px) { :root { --panel-w: 92vw; } }
+@media print {
+  .topnav, .form, #side-panel, .legend { display: none !important; }
+  body, body.has-panel { padding: 0; background: #fff; }
+  .wrap { max-width: none; padding: 0; }
+  .layout { display: block; }
+  .rule, .summary, details.not-req { break-inside: avoid; }
+}
+</style>
+<link rel="stylesheet" href="ui-theme.css">
+
+<nav class="topnav">
+  <div class="brand">Maldives Building Regulation Navigator</div>
+  <a href="building-reg.html">Guideline</a>
+  <a class="on" href="#">Rules Checker</a>
+  <a href="checklist.html">Checklist</a>
+  <a href="downloads.html">Downloads</a>
+  <div class="theme-controls">
+    <div class="grp" id="theme-name-picker">
+      <button data-name="classic">Classic</button>
+      <button data-name="modern">Modern</button>
+    </div>
+    <div class="grp" id="theme-mode-picker">
+      <button data-mode="light">☀</button>
+      <button data-mode="system">◑</button>
+      <button data-mode="dark">☾</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Case 2019/R-1002 · Project checker</div>
+  <h1>Islands Building Rules Checker</h1>
+  <div class="sub">Enter your project details on the left. On the right you'll see only the rules that actually apply, in plain summary — each links back to the source guideline.</div>
+  <div style="margin-top: 8px; font-size: 12px; color: var(--muted);">Source of truth: <a href="building-reg.html" style="color: var(--accent); text-decoration: none;">Building in Islands or Lagoons Without Planning Guidelines ↗</a></div>
+</header>
+
+<div class="layout">
+  <form class="form" id="f">
+    <h2>Project details</h2>
+
+    <div class="field">
+      <label for="loc">Location</label>
+      <select id="loc">
+        <option value="city">Residential — city</option>
+        <option value="non-city">Residential — non-city island</option>
+        <option value="non-residential">Non-residential island</option>
+        <option value="government">Government-allocated development</option>
+        <option value="industrial">Industrial / economic zone</option>
+        <option value="lagoon">Lagoon</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="area">Plot / footprint area <span class="unit" data-f="area"><button type="button" data-u="sqft" class="on">sq ft</button><button type="button" data-u="sqm">m²</button></span></label>
+      <input type="number" id="area" placeholder="e.g. 750" min="0" step="1">
+    </div>
+
+    <div class="field">
+      <label for="wc">Width coefficient <span class="unit" data-f="wc"><button type="button" data-u="m" class="on">m</button><button type="button" data-u="ft">ft</button></span></label>
+      <input type="number" id="wc" placeholder="e.g. 4.5" min="0" step="0.001">
+      <label class="mini-check" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-top:4px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400;"><input type="checkbox" id="wc-auto" style="width:14px;height:14px;"> auto-calculate from area ÷ longest length</label>
+      <div id="wc-sub" hidden style="display:flex;gap:6px;margin-top:6px;align-items:center;">
+        <input type="number" id="wc-len" placeholder="longest length" min="0" step="0.001" style="flex:1;padding:8px 10px;border:1px solid var(--line-strong);background:var(--ground);color:var(--ink);border-radius:6px;font:inherit;font-variant-numeric:tabular-nums;outline:none;">
+        <span class="unit" data-f="wclen"><button type="button" data-u="m" class="on">m</button><button type="button" data-u="ft">ft</button></span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="road">Access-road width <span class="unit" data-f="road"><button type="button" data-u="m" class="on">m</button><button type="button" data-u="ft">ft</button></span></label>
+      <input type="number" id="road" placeholder="e.g. 3.0" min="0" step="0.001">
+    </div>
+
+    <div class="field">
+      <label for="storeys">Number of storeys</label>
+      <input type="number" id="storeys" placeholder="e.g. 3" min="0" step="1">
+    </div>
+
+    <div class="field">
+      <label for="hplan">Planned height <span class="unit" data-f="hp"><button type="button" data-u="m" class="on">m</button><button type="button" data-u="ft">ft</button></span></label>
+      <input type="number" id="hplan" placeholder="target building height" min="0" step="0.01">
+    </div>
+
+    <div class="field">
+      <label for="council">Council-set maximum (§6-1) <span class="unit" data-f="cc"><button type="button" data-u="m" class="on">m</button><button type="button" data-u="ft">ft</button></span></label>
+      <input type="number" id="council" placeholder="if council has set one" min="0" max="30.48" step="0.01">
+    </div>
+
+    <div class="field">
+      <label>Options</label>
+      <label class="check"><input type="checkbox" id="basement"><span>Basement parking</span></label>
+      <label class="check"><input type="checkbox" id="airport"><span>Near international airport</span></label>
+      <label class="check"><input type="checkbox" id="balcony"><span>Has balconies or terraces</span></label>
+      <label class="check"><input type="checkbox" id="stairs" checked><span>Has stairs</span></label>
+      <label class="check"><input type="checkbox" id="corner"><span>Corner plot on two roads</span></label>
+      <label class="check"><input type="checkbox" id="irregular"><span>Irregular plot shape</span></label>
+      <label class="check"><input type="checkbox" id="maint-shed"><span>Single-storey maintenance shed only</span></label>
+    </div>
+
+    <button type="button" id="apply" style="width:100%;padding:12px;background:var(--accent);color:var(--panel);border:none;border-radius:8px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;margin-top:6px;">Apply</button>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <button type="button" class="reset" id="reset">Reset</button>
+      <button type="button" class="reset" id="export-json" style="border-color:var(--accent);color:var(--accent);">Export JSON</button>
+      <button type="button" class="reset" id="import-json">Import JSON</button>
+      <button type="button" class="reset" id="print-report">Print report</button>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+    </div>
+  </form>
+
+  <div class="results" id="r" aria-live="polite">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot warn"></div><span><strong style="color:var(--ink)">Action / threshold triggered</strong> — a mandatory requirement or approval you must obtain</span></div>
+      <div class="legend-item"><div class="legend-dot std"></div><span><strong style="color:var(--ink)">Standard rule applies</strong> — design must comply</span></div>
+      <div class="legend-item"><div class="legend-dot info"></div><span><strong style="color:var(--ink)">Informational</strong> — context or an allowance you may use</span></div>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">Rules checker prepared by <strong>Arkido Studio</strong>.</footer>
+</div>
+
+<aside id="side-panel" role="dialog" aria-modal="false" aria-labelledby="side-panel-title" aria-hidden="true">
+  <div id="side-panel-head">
+    <div>
+      <div id="side-panel-title">Reference</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">From the guideline</div>
+    </div>
+    <button id="side-panel-close" aria-label="Close">×</button>
+  </div>
+  <div id="side-panel-body"></div>
+</aside>
+
+<script>
+const ART_URL = "building-reg.html";
+
+const GUIDE_DATA = [
+    { chapter: "Chapter One", chapterTitle: "Preliminary" },
+    {
+      id: "1",
+      title: "Title and Authority",
+      body: `<p><strong>(a)</strong> Made under Section 95 of the Construction Act (Act No. 4/2017), to prescribe how buildings are to be built in islands or lagoons where no planning rules are in force.</p><p><strong>(b)</strong> Cited as the <strong>"Regulation on Building in Islands or Lagoons Without Planning Rules."</strong></p>`,
+    },
+    {
+      id: "2",
+      title: "Purpose",
+      body: `<p><strong>(a)</strong> Set the criteria for determining building height in islands or lagoons where no planning rules are in force.</p><p><strong>(b)</strong> Ensure buildings in those places are safe and healthy.</p><p><strong>(c)</strong> Set out the measures to be taken against violators, and identify who takes them.</p>`,
+    },
+    {
+      id: "3",
+      title: "Enforcement Authority",
+      body: `<p>The Ministry responsible for construction policy, and the agencies it designates to issue construction permits.</p>`,
+    },
+    {
+      id: "4",
+      title: "Effective Date",
+      body: `<p><strong>60 (sixty) days</strong> after publication in the Government Gazette.</p>`,
+    },
+    {
+      id: "5",
+      title: "Definitions",
+      body: `<ul>
+    <li><strong>"Ministry"</strong> — The Government Ministry responsible for construction policy.</li>
+    <li><strong>"Minister"</strong> — The Minister of that Ministry.</li>
+    <li><strong>"Lagoon"</strong> (<em>falhu</em>) — The area from the island's shoreline to the outer edge of the reef, or the area enclosed by the reef and reef flat.</li>
+    <li><strong>"City"</strong> — An island or administrative area designated a city by the Government.</li>
+    <li><strong>"Development control"</strong> — The planning standards for the site under construction.</li>
+    <li><strong>"Land"</strong> — State (Bandaara) land and private land.</li>
+    <li><strong>"Road"</strong> — The main road, street or lane adjoining the building, or the road leading to a subdivided plot.</li>
+    <li><strong>"Road width"</strong> — Boundary to boundary across the road, not the paved width.</li>
+    <li><strong>"Building footprint"</strong> — The ground-floor built area, excluding vacant space left unbuilt on that floor.</li>
+    <li><strong>"Building width coefficient"</strong> — Building area ÷ the building's greatest external length.
+      <ol><li>Calculated in metres; area expressed in square metres.</li>
+      <li>Where the dimensions of a plot make the coefficient impossible to obtain, the Ministry determines both the coefficient and the maximum height.</li></ol>
+    </li>
+    <li><strong>"Opening"</strong> — A window, vent or similar that opens. Glass blocks used only for light, and the non-opening part of a sliding unit, are excluded.</li>
+    <li><strong>"Building Code"</strong> — The standards to be observed in construction.</li>
+    <li><strong>"Compliance Document"</strong> — The documents of rules and standards issued under the Building Code.</li>
+    <li><strong>"Ramp"</strong> — A sloped surface used to ascend to or descend from a raised level.</li>
+    <li><strong>"Construction Act" / "Act"</strong> — Act No. 4/2017 and its amendments.</li>
+  </ul>`,
+    },
+
+    { chapter: "Chapter Two", chapterTitle: "Construction Practice" },
+    {
+      id: "6",
+      title: "Design Under Development Control",
+      body: `<p><strong>(a)</strong> <span class="amend">[2020/R-9]</span> In the following cases, development control shall be obtained from the Ministry and the building designed in accordance with it:</p>
+  <ol>
+    <li><span class="amend">[2020/R-9]</span> buildings exceeding <strong>30.48 m (100 ft)</strong> in height on land allocated for residential purposes, on islands <em>other than</em> those designated cities;</li>
+    <li>buildings up to 30.48 m on residential land in islands designated cities;</li>
+    <li>land allocated by the Government for development purposes;</li>
+    <li>land designated an industrial zone or economic zone;</li>
+    <li>islands other than inhabited islands;</li>
+    <li>lagoons.</li>
+  </ol>
+  <p><strong>(b)</strong> Development control shall address building height, vacant space, parking and similar standards.</p>
+  <p><strong>(c)</strong> Notwithstanding (a)(5), a single-storey roofed building with a gross floor area not exceeding <strong>1,200 sq ft</strong>, on a non-residential island, need not comply with development control.</p>
+  <div class="subarticle" id="a6-1"><div class="art-num">Article 6-1</div><h2>Determination of Maximum Building Height by the Council</h2>
+  <p><em>Added by <span class="amend">[2021/R-167]</span>.</em></p>
+  <p><strong>(a)</strong> The council of an inhabited island may set the maximum height of buildings on that island, up to <strong>30.48 m</strong>. Where a council does so:</p>
+  <ol>
+    <li>the decision shall be published in the Government Gazette, together with the date it comes into force;</li>
+    <li>the decision shall be given to the Ministry in writing.</li>
+  </ol>
+  <blockquote>A determination made by the council governs. The heights arrived at under Articles 8 and 9 are the general position and yield to it. This Article applies to island councils and city councils alike.</blockquote></div>`,
+    },
+    {
+      id: "7",
+      title: "Other Construction",
+      body: `<p><strong>(a)</strong> Structures other than those in Article 6(a) shall be designed and built to the planning standards in this regulation.</p><p><strong>(b)</strong> Where development control under Article 6(b) sets rules and standards, those shall be observed in the design.</p><p><strong>(c)</strong> All other construction matters follow the Construction Act and its regulations.</p>`,
+    },
+
+    { chapter: "Chapter Three", chapterTitle: "Height of Buildings on Residential Land" },
+    { sourceNote: `Height is measured from <strong>pavement level</strong> to the top of the <strong>roof beam, terrace slab or deck</strong>. Construction above that level is governed by Article 10. Heights under this Chapter apply in a manner that does not conflict with <strong>Article 6-1</strong> — where the council has determined a maximum height for the island, that determination governs. <span class="amend">[2021/R-167]</span>` },
+    {
+      id: "8",
+      title: "Height — Residential Land on Islands Other Than Cities",
+      body: `<p><em>Opening phrase replaced by <span class="amend">[2021/R-167]</span>; paragraphs (c) to (f) substituted and added by <span class="amend">[2020/R-9]</span>.</em></p>
+  <p>For a building on a plot allocated for residential purposes on an island other than a city, the maximum height is determined as below, in a manner that does not conflict with Article 6-1.</p>
+  <table><thead><tr><th></th><th>Building footprint</th><th>Access road / alley width</th><th>Maximum height</th></tr></thead><tbody>
+    <tr><td><strong>(a)</strong></td><td>under 100 sq ft, <em>or</em> width coefficient under 1.829 m (6 ft)</td><td>—</td><td>1 storey, max <strong>6 m</strong></td></tr>
+    <tr><td><strong>(b)</strong></td><td>under 600 sq ft</td><td>—</td><td><strong>10.5 m</strong> (34.449 ft)</td></tr>
+    <tr><td><strong>(c)</strong> <span class="amend">[2020/R-9]</span></td><td>600 – &lt; 1,000 sq ft</td><td>less than 1.828 m (6 ft)</td><td><strong>12.5 m</strong> (41.010 ft)</td></tr>
+    <tr><td><strong>(d)</strong> <span class="amend">[2020/R-9]</span></td><td>600 – &lt; 1,000 sq ft</td><td>at least 1.828 m (6 ft)</td><td><strong>18.5 m</strong> (60.696 ft)</td></tr>
+    <tr><td><strong>(e)</strong> <span class="amend">[2020/R-9]</span></td><td>1,000 sq ft or more</td><td>at least 4.572 m (15 ft)</td><td><strong>24.5 m</strong> (80.381 ft)</td></tr>
+    <tr><td><strong>(f)</strong> <span class="amend">[2020/R-9]</span></td><td>2,000 sq ft or more</td><td>at least 6.096 m (20 ft)</td><td><strong>30.48 m</strong> (100 ft)</td></tr>
+  </tbody></table>
+  <blockquote><strong>Interpretation note — apparent gap:</strong> Article 8 does not state a maximum height for a footprint of 1,000 sq ft or more where the width coefficient is at least 1.829 m and the access road or alley is less than 4.572 m (15 ft). The checker uses 18.5 m as a provisional fallback, but authority confirmation is required.</blockquote>`,
+    },
+    {
+      id: "9",
+      title: "Height — Residential Land in Cities",
+      body: `<p><em>Opening phrase replaced by <span class="amend">[2021/R-167]</span>.</em></p>
+  <p>For a building on a plot allocated for residential purposes on an island designated a city, the maximum height is determined as below, in a manner that does not conflict with Article 6-1.</p>
+  <p><strong>(a)</strong> Footprint under 100 sq ft, <em>or</em> width coefficient under 1.829 m (6 ft) → not more than 1 storey.</p>
+  <p><strong>(b)</strong> Footprint under 800 sq ft → the <strong>lowest</strong> of the heights given by the footprint, the width coefficient, and the access-road width.</p>
+  <p><strong>(c)</strong> Where the width coefficient &lt; 0.7 × √(building area), height is determined from the width coefficient (see <a href="#atbl1">Table 1</a>):<br><code>Max height = 1.2 + 0.3875 × (WC ÷ 0.7)²</code></p>
+  <p><strong>(d)</strong> Where the width coefficient ≥ 0.7 × √(building area), height is determined from the footprint (see <a href="#atbl2">Table 2</a>):<br><code>Max height = 1.2 + 0.3875 × footprint(m²)</code></p>
+  <p><strong>(e)</strong> Height is also determined by access-road width (see <a href="#atbl3">Table 3</a>):</p>
+  <ol>
+    <li>Under 1.219 m (4 ft) → 1 storey, max 6 m</li>
+    <li>1.219 m – 1.524 m → 9 m (29.53 ft)</li>
+    <li>Over 1.524 m – 1.829 m → 19.20 m (62.99 ft)</li>
+    <li>Over 1.829 m – 3.048 m → 25.20 m (82.68 ft)</li>
+    <li>Over 3.048 m → 30.48 m (100 ft)</li>
+  </ol>
+  <p><strong>(f)</strong> Footprint 800 sq ft or more → the lower of the heights given by access-road width and width coefficient.</p>
+  <p><strong>(g)</strong> In the case referred to in (c), the width coefficient applies as:</p>
+  <ol>
+    <li>Coefficient 3.0 or less → not exceeding <strong>16.5 m</strong> (54.13 ft).</li>
+    <li>Coefficient above 3.0 → not exceeding <strong>30.48 m</strong> (100 ft).</li>
+  </ol>
+  <p><strong>(h)</strong> The maximum height by access-road width shall be determined under (e).</p>
+  <div class="calc" id="calc9">
+    <div class="calc-head">Height calculator</div>
+    <div class="calc-grid">
+      <label>
+        <span class="lab-row">Footprint area <span class="unit-toggle" data-field="area"><button type="button" data-u="sqft" class="active">sq ft</button><button type="button" data-u="sqm">m²</button></span></span>
+        <input type="number" id="c-area" placeholder="e.g. 750" min="0" step="1">
+      </label>
+      <label>
+        <span class="lab-row">Width coefficient <span class="unit-toggle" data-field="wc"><button type="button" data-u="m" class="active">m</button><button type="button" data-u="ft">ft</button></span></span>
+        <input type="number" id="c-wc" placeholder="e.g. 4.5" min="0" step="0.001">
+        <label class="mini-check"><input type="checkbox" id="c-wc-auto"> auto-calculate</label>
+        <div class="sub-inputs" id="c-wc-sub" hidden>
+          <input type="number" id="c-wc-len" placeholder="longest length" min="0" step="0.001">
+          <span class="unit-toggle" data-field="wclen"><button type="button" data-u="m" class="active">m</button><button type="button" data-u="ft">ft</button></span>
+        </div>
+      </label>
+      <label>
+        <span class="lab-row">Access-road width <span class="unit-toggle" data-field="road"><button type="button" data-u="m" class="active">m</button><button type="button" data-u="ft">ft</button></span></span>
+        <input type="number" id="c-road" placeholder="e.g. 3.0" min="0" step="0.001">
+      </label>
+    </div>
+    <div class="calc-out" id="c-out">Enter values to see the maximum height.</div>
+    <div class="calc-note">Applies §9 caps. Width coefficient = Area (m²) ÷ Longest length (m) per §5.</div>
+  </div>`,
+    },
+    {
+      id: "10",
+      title: "Construction Above the Roof Beam / Terrace Slab / Deck",
+      body: `<p>After the maximum height is fixed under Articles 8 and 9, the following may be added (see Schedule 1):</p>
+  <ol type="a">
+    <li>Staircase and lift machine-room enclosure → not exceeding <strong>4 m</strong>. A greater height requires the lift manufacturer's specification.</li>
+    <li>Roof over that enclosure → up to <strong>1 m</strong> (3.280 ft).</li>
+    <li>Roof over the building → up to <strong>1.5 m</strong> (4.921 ft) above the roof beam.</li>
+    <li>Up to <strong>two-thirds</strong> of the terrace area may be built upon; its roof and drainage may project 0.457 m (1.499 ft) into the terrace.</li>
+    <li>Construction under (d) shall not exceed the lift machine-room height or 4 m.</li>
+    <li>Antennas and satellite dishes are not counted in building height. Near an international airport, they shall be installed under the relevant aviation regulations.</li>
+  </ol>`,
+    },
+    {
+      id: "11",
+      title: "Raising of the Ground Floor",
+      body: `<p><strong>(a)</strong> The ground floor may be raised up to <strong>600 mm</strong> above the highest level of the road or yard, and the same amount added to the overall permissible height.</p><p><strong>(b)</strong> Where raised to provide parking beneath, the allowance is <strong>1.5 m</strong>, likewise added to the overall permissible height.</p>`,
+    },
+    {
+      id: "12",
+      title: "Floor-to-Ceiling Height",
+      body: `<p><strong>(a)</strong> Residential floors → at least <strong>2.7 m</strong> (8.859 ft) to the underside of the slab or deck.</p><p><strong>(b)</strong> Non-residential floors → at least <strong>2.5 m</strong> (8.202 ft).</p>`,
+    },
+    {
+      id: "13",
+      title: "Road Width Used",
+      body: `<p><strong>(a)</strong> On a subdivided plot → the width of the main road on which the plot is located.</p><p><strong>(b)</strong> On a road accessible from one end only → the width of the main road.</p>`,
+    },
+    {
+      id: "14",
+      title: "Where Height Cannot Be Determined",
+      body: `<p>Where an irregular plot shape, an indeterminable maximum length, or any other reason prevents the height being fixed, a proposal shall be submitted to the Ministry for determination.</p>`,
+    },
+
+    { chapter: "Chapter Four", chapterTitle: "Vacant Space on Residential Land" },
+    {
+      id: "15",
+      title: "Allocation of Vacant Space",
+      body: `<p><em>Article 15 was replaced in full by <span class="amend">[2020/R-9]</span>.</em></p>
+  <p><strong>(a)</strong> Where the case is not particularly specified in paragraphs (b) to (d), a building on land allocated for residential purposes with a footprint of <strong>1,200 sq ft or more</strong> shall leave <strong>10%</strong> of the building footprint as unsheltered vacant space.</p>
+  <p><strong>(b)–(d)</strong> In the following cases, <strong>5%</strong> of the building footprint shall be left as unsheltered vacant space, and paragraph (a) does not apply in addition:</p>
+  <table><thead><tr><th></th><th>Location</th><th>Footprint</th><th>Height</th><th>Vacant space</th><th>Setback</th></tr></thead><tbody>
+    <tr><td><strong>(b)</strong></td><td>non-city islands</td><td>≥ 1,000 sq ft</td><td>18.5 – 24.5 m</td><td>5%, side facing road</td><td>≥ <strong>0.75 m</strong> from plot edge, any 2 sides</td></tr>
+    <tr><td><strong>(c)</strong></td><td>non-city islands</td><td>≥ 2,000 sq ft</td><td>24.5 – 30.48 m</td><td>5%, side facing road</td><td>≥ <strong>0.90 m</strong> from plot edge, any 2 sides</td></tr>
+    <tr><td><strong>(d)</strong></td><td>cities</td><td>600 – ≤ 1,200 sq ft</td><td>18.5 – 30.48 m</td><td>5%, anywhere within footprint</td><td>none prescribed</td></tr>
+  </tbody></table>
+  <p><strong>(b) continued</strong> — Balconies may project into the setback under (b) from <strong>6 m</strong> above ground or pavement level and above, up to <strong>50%</strong> of the length of the side of the building containing the setback.</p>
+  <p><strong>(e)</strong> Wherever 5% of the building footprint is to be left as unsheltered vacant space, that open void shall be at least <strong>0.75 m</strong> deep.</p>
+  <p><strong>(f)</strong> Unsheltered air vents for building ventilation may be counted towards the 5% vacant space, provided each is at least <strong>0.9 m × 0.9 m</strong>.</p>
+  <p><strong>(g)</strong> No part of the building shall extend into the vacant space, except:</p>
+  <ol>
+    <li>the roof drain, which may extend <strong>0.2 m</strong> from the building wall;</li>
+    <li>doors and window shutters, which may be opened to ventilate and light the building.</li>
+  </ol>
+  <p><strong>(h)</strong> The vacant space may be used for parking under Article 20(a). Where the 5% is at the front of the building (paragraphs b and c), only <strong>50%</strong> of that vacant space may be used for parking.</p>`,
+    },
+    {
+      id: "15-1",
+      title: "Rounding of a Corner Plot Abutting Two Roads",
+      body: `<p><em>Added by <span class="amend">[2020/R-9]</span>.</em></p>
+  <p>A building on a corner plot abutting two roads shall be designed with the corner rounded to a radius of <strong>12 ft</strong>, measured from the part of the plot adjacent to the road boundary.</p>
+  <p><em>For reference only: 12 ft = 3.6576 m.</em></p>`,
+    },
+
+    { chapter: "Chapter Five", chapterTitle: "Building Projections on Residential Land" },
+    {
+      id: "16",
+      title: "Projections Beyond the Boundary",
+      body: `<p>No part of a building may project beyond the plot boundary, except:</p>
+  <ol type="a">
+    <li>Road under 6 ft wide → the roof may project <strong>0.2 m (0.656 ft)</strong>, at more than 2.743 m (9 ft) above the road.</li>
+    <li>Road 6 ft or wider → the roof and drainage may project <strong>0.457 m (1.499 ft)</strong>, at more than 2.743 m (9 ft) above the road.</li>
+  </ol>`,
+    },
+    {
+      id: "17",
+      title: "Doors, Windows and Fanlights Opening Toward the Road",
+      body: `<p><strong>(a)</strong> None shall open beyond the boundary below 2.743 m (9 ft) above pavement level.</p><p><strong>(b)</strong> Above 2.743 m (9 ft), they shall project no more than <strong>0.457 m (1.499 ft)</strong>.</p>`,
+    },
+
+    { chapter: "Chapter Six", chapterTitle: "Ventilation and Lighting on Residential Land" },
+    {
+      id: "18",
+      title: "Ventilation and Light to Parts of the Building",
+      body: `<p><em>Applies until the relevant Building Code compliance document is published and in force.</em></p>
+  <ol type="a">
+    <li>Each part of the building shall have openings facing unbuilt vacant space totalling not less than <strong>10%</strong> of that part's floor area.</li>
+    <li>An opening is deemed to ventilate <strong>6 m</strong> from the opening. Where the opening is not less than 15% of the floor area, it is deemed to ventilate <strong>7.5 m</strong>.</li>
+    <li>Unbuilt vacant space shall be at least <strong>600 × 600 mm</strong> clear. Where it adjoins another plot, it shall be at least <strong>750 mm</strong> from the boundary.</li>
+    <li>No opening of any kind — including fixed glass — shall be placed in a wall built on the boundary of another plot. Any opening facing an adjoining plot shall be set back at least 750 mm.</li>
+    <li>The adjoining road or alley may be used in place of vacant space. Where a plot is subdivided, no opening may be placed so as to give entry into a plot other than the one from which the yard was taken.</li>
+    <li>Notwithstanding (e), an alley created by subdivision that becomes a government alley is treated as any other adjoining road.</li>
+    <li>The lowest 2 floors (combined height not exceeding 7.5 m), if non-residential and adequately mechanically ventilated, need not have the openings and vacant space in (a), (b) and (c). The remainder of the building shall comply, and the vacant space shall be open from its base to the top. If those floors are used for residential purposes at any time, (a), (b) and (c) apply to them.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Seven", chapterTitle: "Railings and Windows on Residential Land" },
+    {
+      id: "19",
+      title: "Standards for Balconies, Stairs, Terraces and Windows",
+      body: `<p><em>Applies until the Building Code compliance documents come into force.</em></p>
+  <ol type="a">
+    <li>Railings or walls on balconies and terraces → at least <strong>1.2 m</strong> (3.94 ft) high, with no gap admitting a <strong>125 mm</strong> sphere, and not climbable by children.</li>
+    <li>Where any part of a building adjoins the boundary of another plot → a wall or barrier of at least <strong>2 m</strong> (6.562 ft) shall be constructed.</li>
+    <li>Railings or walls shall also be installed on balconies and terraces not covered by (b).</li>
+    <li>Staircases → railings or walls at least <strong>850 mm</strong> high. In service areas children would not normally enter, they shall be safe but need not be childproof.</li>
+    <li>Windows more than 2.743 m (9 ft) above ground → sill at least <strong>1 m</strong> (3.281 ft) above floor level.</li>
+    <li>Notwithstanding (e), windows opening onto terraces and balconies may be lower than 1 m above floor level.</li>
+    <li>A vent in a common area more than 2.743 m (9 ft) above ground, if it admits a 125 mm sphere, shall be at least 1 m above floor level.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Eight", chapterTitle: "Parking on Residential Land" },
+    {
+      id: "20",
+      title: "Determination of Parking",
+      body: `<ol type="a">
+    <li>Footprint over 1,200 sq ft <strong>AND</strong> more than 5 storeys → <strong>10%</strong> of the footprint allocated to parking.</li>
+    <li>Parking need not be on the lowest floor, but easy vehicle access shall be planned.</li>
+    <li>The parking area may be divided, but no part may be less than 5% of the footprint. The access road or ramp is not counted within the 10%.</li>
+    <li>No parking is required for plots on roads where vehicle access is prohibited.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Nine", chapterTitle: "Miscellaneous" },
+    {
+      id: "21",
+      title: "Waste Storage Space",
+      body: `<p><strong>(a)</strong> Footprint 1,000 sq ft or more → at least <strong>1.5%</strong> of the footprint as waste storage space.</p><p><strong>(b)</strong> Not less than <strong>2 × 2 ft</strong>.</p>`,
+    },
+    {
+      id: "22",
+      title: "Subdivision of Land",
+      body: `<p>Where a residential plot is subdivided to include an alley, that alley shall be at least <strong>4 ft</strong> wide.</p>`,
+    },
+    {
+      id: "23",
+      title: "Space Adjacent to Boundaries",
+      body: `<p>Where a building or part of a building is built against a boundary other than a road boundary, a vacant space at least <strong>750 mm</strong> wide shall be left. It need not be provided on all sides where part of the building sits on the boundary, but every such space shall remain accessible for cleaning.</p>`,
+    },
+    {
+      id: "24",
+      title: "Non-Residential Uses on Residential Land",
+      body: `<p>Within <strong>60 days</strong> of publication, the Ministry shall publish a permit application procedure for sai-hotels, restaurants, cafés, bakeries, shops, carpentry and other workshops, warehouses and other economic establishments on residential land.</p>`,
+    },
+    {
+      id: "25",
+      title: "Planning Committee",
+      body: `<ol type="a">
+    <li>The Minister shall appoint a <strong>Planning Committee</strong> to decide matters within the purpose of this regulation, or within its jurisdiction under the Construction Act, that are not expressly provided for.</li>
+    <li>The Committee shall determine its own procedures.</li>
+    <li>It operates under the Ministry that sets the planning standards.</li>
+    <li>Policy decisions on matters before it are taken on the direction of the Minister.</li>
+    <li>Its decisions are binding.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Ten", chapterTitle: "Action for Violations" },
+    {
+      id: "26",
+      title: "Procedure for Violations",
+      body: `<ol type="a">
+    <li>Omitting anything required by this regulation is prohibited. Any person noticing a violation shall notify the building-permit issuing authority.</li>
+    <li>Where that authority takes no action within <strong>30 days</strong> of notification, the matter shall be referred to the Ministry.</li>
+    <li>On receiving information under (a), or on finding a violation itself, the authority shall inspect the premises for compliance.</li>
+    <li>Where an inspection under (c) finds non-compliance, or the authority finds the premises may be hazardous:
+      <ol>
+        <li>a period under Article 27 shall be given and rectification ordered within it;</li>
+        <li>the notice shall state the reason and the period, and shall be dated, signed and stamped;</li>
+        <li>the authority shall monitor the premises until rectification is complete.</li>
+      </ol>
+    </li>
+  </ol>`,
+    },
+    {
+      id: "27",
+      title: "Action Against Violators",
+      body: `<p>Each violation is dealt with separately:</p>
+  <ol type="a">
+    <li><span class="amend">[2020/R-9]</span> A period for rectification shall be given according to the gravity of the matter and, upon notice, a fine <strong>not exceeding MVR 100,000</strong> shall be imposed separately for each violation.</li>
+    <li><strong>3%</strong> of the fine added for each additional day the matter remains unrectified after that period.</li>
+    <li>Where the fine is unpaid and the matter unrectified, referral to the Attorney General's Office for recovery of the fine and an order to rectify.</li>
+  </ol>`,
+    },
+
+    { chapter: "Tables & Schedule", chapterTitle: "Reference tables and drawings" },
+    {
+      id: "tbl1",
+      title: "Table 1 — City residential: height by width coefficient",
+      body: `<p><em>Applies where the width coefficient &lt; 0.7 × √(building area). These are prescribed maxima and govern where they differ from the §9(c) formula.</em></p>
+  <table><thead><tr><th>Width coefficient (m)</th><th>Maximum height (m)</th></tr></thead><tbody>
+    <tr><td>2.438</td><td>5.90</td></tr>
+    <tr><td>3.448</td><td>10.60</td></tr>
+    <tr><td>5.452</td><td>24.71</td></tr>
+    <tr><td>6.451</td><td>26.40</td></tr>
+    <tr><td>6.954</td><td>30.48</td></tr>
+  </tbody></table>`,
+    },
+    {
+      id: "tbl2",
+      title: "Table 2 — City residential: height by footprint",
+      body: `<p><em>Applies where the width coefficient ≥ 0.7 × √(building area).</em></p>
+  <table><thead><tr><th>Footprint (m²)</th><th>Maximum height (m)</th></tr></thead><tbody>
+    <tr><td>9.290</td><td>4.8</td></tr>
+    <tr><td>18.581</td><td>8.4</td></tr>
+    <tr><td>46.452</td><td>19.20</td></tr>
+    <tr><td>65.032</td><td>26.40</td></tr>
+    <tr><td>75.561</td><td>30.48</td></tr>
+  </tbody></table>`,
+    },
+    {
+      id: "tbl3",
+      title: "Table 3 — City residential: height by access-road width",
+      body: `<table><thead><tr><th>Access-road width</th><th>Maximum height</th></tr></thead><tbody>
+    <tr><td>Under 1.219 m</td><td>1 storey, max 6 m</td></tr>
+    <tr><td>1.219 m – 1.524 m</td><td>9 m</td></tr>
+    <tr><td>Over 1.524 m – 1.829 m</td><td>20 m</td></tr>
+    <tr><td>Over 1.829 m – 3.048 m</td><td>25.20 m</td></tr>
+    <tr><td>Over 3.048 m</td><td>Up to 30.48 m</td></tr>
+  </tbody></table>
+  <p><em>Note: §9(e)(3) says 19.20 m for the 1.524–1.829 m band; this table says 20 m. Both are reproduced as they stand in the source.</em></p>`,
+    },
+    {
+      id: "sch1",
+      title: "Schedule 1 — Drawings",
+      body: `<ul>
+    <li><strong>Drawing 1</strong> — Raising of the staircase and lift machine-room enclosure, and the roof projection. Elements: max building height · terrace railing/wall height · permissible construction height · top level of ground/yard.</li>
+    <li><strong>Drawing 2</strong> — Raising and roofing of the staircase and lift machine-room enclosure. Same elements.</li>
+    <li><strong>Drawing 3</strong> — Roofing at the top of the building. Elements: max building height · permissible construction height · top level of ground/yard.</li>
+  </ul>
+  <p><em>Original diagrams accompany the source PDF.</em></p>`,
+    },
+];
+const GUIDE_ARTICLES = {};
+GUIDE_DATA.forEach((d) => { if (d.id && d.title && d.body) GUIDE_ARTICLES[d.id] = { title: d.title, body: d.body }; });
+GUIDE_ARTICLES["6-1"] = GUIDE_ARTICLES["6"];
+
+const SQFT_TO_SQM = 0.092903;
+const FT_TO_M = 0.3048;
+const units = { area: "sqft", wc: "m", road: "m", hp: "m", cc: "m", wclen: "m" };
+
+const $ = (id) => document.getElementById(id);
+
+document.querySelectorAll(".unit").forEach((tg) => {
+  tg.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    tg.querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+    b.classList.add("on");
+    units[tg.dataset.f] = b.dataset.u;
+    saveState();
+    markDirty();
+  });
+});
+const FIELDS = ["loc","area","wc","wc-auto","wc-len","road","storeys","hplan","council","basement","airport","balcony","stairs","corner","irregular","maint-shed"];
+const CHECKS = new Set(["basement","airport","balcony","stairs","corner","irregular","maint-shed","wc-auto"]);
+const STORE_KEY = "islands-checker-v1";
+function saveState() {
+  const s = { units };
+  FIELDS.forEach((id) => { const el = $(id); s[id] = CHECKS.has(id) ? el.checked : el.value; });
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(e) {}
+}
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (!s) return;
+    if (s.units) Object.assign(units, s.units);
+    FIELDS.forEach((id) => {
+      if (s[id] === undefined) return;
+      const el = $(id);
+      if (CHECKS.has(id)) el.checked = !!s[id]; else el.value = s[id];
+    });
+    // restore unit-toggle active state
+    document.querySelectorAll(".unit").forEach((tg) => {
+      const f = tg.dataset.f;
+      tg.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.u === units[f]));
+    });
+  } catch(e) {}
+}
+loadState();
+FIELDS.forEach((id) => {
+  $(id).addEventListener("input", () => { saveState(); markDirty(); });
+  $(id).addEventListener("change", () => { saveState(); markDirty(); });
+});
+function syncBalconyFromStoreys() {
+  if (parseFloat($("storeys").value) > 1 && !$("balcony").checked) {
+    $("balcony").checked = true;
+    saveState();
+  }
+}
+$("storeys").addEventListener("input", syncBalconyFromStoreys);
+$("storeys").addEventListener("change", syncBalconyFromStoreys);
+syncBalconyFromStoreys();
+$("apply").addEventListener("click", () => { render(); clearDirty(); });
+// Also apply on Enter in any numeric field
+document.querySelectorAll('#f input[type="number"]').forEach((inp) => {
+  inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); render(); clearDirty(); } });
+});
+function markDirty() { const b = $("apply"); if (b && !b.classList.contains("dirty")) { b.classList.add("dirty"); b.textContent = "Apply changes"; } }
+function clearDirty() { const b = $("apply"); if (b) { b.classList.remove("dirty"); b.textContent = "Apply"; } }
+// Auto-calculate WC toggle
+$("wc-auto").addEventListener("change", () => {
+  const on = $("wc-auto").checked;
+  $("wc-sub").hidden = !on;
+  $("wc").readOnly = on;
+  $("wc").style.opacity = on ? 0.6 : 1;
+});
+// Initialise from stored state
+if ($("wc-auto").checked) { $("wc-sub").hidden = false; $("wc").readOnly = true; $("wc").style.opacity = 0.6; }
+
+$("reset").addEventListener("click", () => {
+  ["area","wc","wc-len","road","storeys","hplan","council"].forEach((id) => ($(id).value = ""));
+  ["basement","airport","balcony","corner","irregular","maint-shed","wc-auto"].forEach((id) => ($(id).checked = false));
+  $("wc-sub").hidden = true; $("wc").readOnly = false; $("wc").style.opacity = 1;
+  $("stairs").checked = true;
+  $("loc").value = "city";
+  try { localStorage.removeItem(STORE_KEY); } catch(e) {}
+  render();
+});
+
+const link = (anchor, label, clauses = []) => `<a href="${ART_URL}#a${anchor}" target="_blank"${clauses.length ? ` data-clauses="${clauses.join(",")}"` : ""}>${label}</a>`;
+const fmt = (n, u) => `${n.toFixed(2)} ${u}`;
+
+function ruleClauses(rule) {
+  if (rule.clauses) return rule.clauses;
+  const escapedRef = rule.ref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const matches = [...`${rule.title} ${rule.body}`.matchAll(new RegExp(`§${escapedRef}\\(?([a-z])\\)?(?:,\\s*([a-z]))?`, "gi"))];
+  return [...new Set(matches.flatMap((m) => [m[1], m[2]]).filter(Boolean).map((s) => s.toLowerCase()))];
+}
+
+function calcCityHeight(areaSqft, wcM, roadM) {
+  const caps = [];
+  if (areaSqft > 0 && areaSqft < 100) caps.push({ h: 6, why: "footprint < 100 sq ft → 1 storey / 6 m (§9a)" });
+  if (wcM > 0 && wcM < 1.829) caps.push({ h: 6, why: "width coefficient < 1.829 m → 1 storey / 6 m (§9a)" });
+  if (areaSqft > 0 && wcM > 0) {
+    const areaSqm = areaSqft * SQFT_TO_SQM;
+    const sqrtArea = Math.sqrt(areaSqm);
+    if (wcM < 0.7 * sqrtArea) {
+      const h = 1.2 + 0.3875 * Math.pow(wcM / 0.7, 2);
+      caps.push({ h, why: `WC formula (§9c): 1.2 + 0.3875 × (${wcM.toFixed(2)}/0.7)² = ${h.toFixed(2)} m` });
+    } else {
+      const h = 1.2 + 0.3875 * areaSqm;
+      caps.push({ h, why: `footprint formula (§9d): 1.2 + 0.3875 × ${areaSqm.toFixed(2)} m² = ${h.toFixed(2)} m` });
+    }
+    if (wcM < 3.0) caps.push({ h: 16.5, why: "width coefficient < 3.0 m → ≤ 16.5 m (§9g)" });
+    else caps.push({ h: 30.48, why: "width coefficient ≥ 3.0 m → ≤ 30.48 m (§9g)" });
+  }
+  if (roadM > 0) {
+    let rc;
+    if (roadM < 1.219) rc = { h: 6, why: "road < 1.219 m → 1 storey / 6 m (§9e / Table 3)" };
+    else if (roadM < 1.524) rc = { h: 9, why: "road 1.219–1.524 m → ≤ 9 m (§9e / Table 3)" };
+    else if (roadM < 1.829) rc = { h: 19.2, why: "road 1.524–1.829 m → ≤ 19.20 m (§9e / Table 3)" };
+    else if (roadM < 3.048) rc = { h: 25.2, why: "road 1.829–3.048 m → ≤ 25.20 m (§9e / Table 3)" };
+    else rc = { h: 30.48, why: "road ≥ 3.048 m → ≤ 30.48 m (§9e / Table 3)" };
+    caps.push(rc);
+  }
+  if (!caps.length) return null;
+  const winner = caps.reduce((a, b) => (b.h < a.h ? b : a));
+  return { max: winner.h, caps, winner };
+}
+
+function calcNonCityHeight(areaSqft, wcM, roadM) {
+  // §8 amended matrix (2020/R-9)
+  if (!(areaSqft > 0)) return null;
+  if (areaSqft < 100 || (wcM > 0 && wcM < 1.829)) return { max: 6, winner: { why: "footprint < 100 sq ft or WC < 1.829 m → 1 storey / 6 m (§8a)" } };
+  if (areaSqft < 600) return { max: 10.5, winner: { why: "footprint < 600 sq ft → 10.5 m (§8b)" } };
+  if (areaSqft < 1000) {
+    if (roadM > 0 && roadM >= 1.828) return { max: 18.5, winner: { why: "footprint 600–1,000 sq ft, road ≥ 1.828 m → 18.5 m (§8d)" } };
+    return { max: 12.5, winner: { why: `footprint 600–1,000 sq ft${roadM > 0 ? ", road < 1.828 m" : ""} → 12.5 m (§8c)` } };
+  }
+  if (areaSqft < 2000) {
+    if (roadM > 0 && roadM >= 4.572) return { max: 24.5, winner: { why: "footprint 1,000–2,000 sq ft, road ≥ 4.572 m → 24.5 m (§8e)" } };
+    return { max: 18.5, provisional: true, winner: { why: "provisional 18.5 m fallback — no maximum is stated for this combination; authority confirmation is required" } };
+  }
+  // ≥ 2000
+  if (roadM > 0 && roadM >= 6.096) return { max: 30.48, winner: { why: "footprint ≥ 2,000 sq ft, road ≥ 6.096 m → 30.48 m (§8f)" } };
+  if (roadM > 0 && roadM >= 4.572) return { max: 24.5, winner: { why: "footprint ≥ 2,000 sq ft, road 4.572–6.096 m → 24.5 m (§8e)" } };
+  return { max: 18.5, provisional: true, winner: { why: "provisional 18.5 m fallback — no maximum is stated for this combination; authority confirmation is required" } };
+}
+
+function render() {
+  const loc = $("loc").value;
+  let area = parseFloat($("area").value);
+  let wc = parseFloat($("wc").value);
+  let road = parseFloat($("road").value);
+  let hPlan = parseFloat($("hplan").value);
+  let council = parseFloat($("council").value);
+  const storeys = parseFloat($("storeys").value);
+  const basement = $("basement").checked;
+  const airport = $("airport").checked;
+  const balcony = $("balcony").checked;
+  const stairs = $("stairs").checked;
+  const corner = $("corner").checked;
+  const irregular = $("irregular").checked;
+  const shed = $("maint-shed").checked;
+
+  if (units.area === "sqm" && area > 0) area = area / SQFT_TO_SQM;
+  if (units.wc === "ft" && wc > 0) wc = wc * FT_TO_M;
+  if (units.road === "ft" && road > 0) road = road * FT_TO_M;
+  if (units.hp === "ft" && hPlan > 0) hPlan = hPlan * FT_TO_M;
+  if (units.cc === "ft" && council > 0) council = council * FT_TO_M;
+
+  // Auto-calc width coefficient from area (m²) ÷ longest length (m)
+  if ($("wc-auto").checked && area > 0) {
+    let lenM = parseFloat($("wc-len").value);
+    if (units.wclen === "ft" && lenM > 0) lenM = lenM * FT_TO_M;
+    if (lenM > 0) {
+      wc = (area * SQFT_TO_SQM) / lenM;
+      $("wc").value = (units.wc === "ft" ? wc / FT_TO_M : wc).toFixed(3);
+    } else {
+      wc = NaN;
+      $("wc").value = "";
+    }
+  }
+
+  // Height summary
+  let maxHeight = null;
+  let heightWhy = "";
+  let heightBases = [];
+  let heightRef = "8";
+  let heightProvisional = false;
+  if (loc === "non-city" && area > 0) {
+    const res = calcNonCityHeight(area, wc, road);
+    if (res) { maxHeight = res.max; heightWhy = res.winner.why; heightBases = [res.winner]; heightProvisional = !!res.provisional; }
+  } else if (loc === "city") {
+    const res = calcCityHeight(area, wc, road);
+    if (res) { maxHeight = res.max; heightWhy = res.winner.why; heightBases = res.caps; heightRef = "9"; }
+  }
+  // §6-1 council override
+  if (council > 0) {
+    maxHeight = council;
+    heightWhy = `Council-set maximum under §6-1: ${council.toFixed(2)} m (governs over §8/§9)`;
+    heightBases = [{ h: council, why: heightWhy }];
+    heightRef = "6-1";
+    heightProvisional = false;
+  }
+
+  // Big summary
+  let summaryHTML = "";
+  if (maxHeight !== null) {
+    const basesHTML = heightBases.length ? `<ul class="height-basis">${heightBases.map((basis) => {
+      const binding = Math.abs(basis.h - maxHeight) < 0.000001;
+      return `<li${binding ? ' class="binding"' : ""}>${basis.why}${binding ? " ← binding" : ""}</li>`;
+    }).join("")}</ul>` : "";
+    summaryHTML = `<div class="summary">
+      <h3>Maximum buildable height</h3>
+      <div class="big-num">${maxHeight.toFixed(2)} m <span class="feet">(${(maxHeight * 3.28084).toFixed(2)} ft)</span></div>
+      ${basesHTML}
+    </div>`;
+  } else if (loc === "city" || loc === "non-city") {
+    const message = loc === "non-city" && area >= 1000
+      ? "Article 8 has no matching height row for this footprint and road width. Confirm the permitted height with the authority."
+      : `Enter plot area${loc === "city" ? ", width coefficient and/or road width" : ""} to compute.`;
+    summaryHTML = `<div class="summary"><h3>Maximum buildable height</h3><div class="big-note">${message}</div></div>`;
+  }
+
+  // Rules
+  const R = { core: [], height: [], structure: [], services: [], enforcement: [] };
+  const NOT = [];
+
+  if (council > 30.48) {
+    R.height.push({ ref: "6-1", cls: "warn", title: "Council maximum is outside §6-1",
+      body: "Article 6-1 permits a council-set maximum only up to <strong>30.48 m</strong>. Check the entered value." });
+  }
+  if (hPlan > 0 && maxHeight !== null && hPlan > maxHeight) {
+    R.height.push({ ref: heightRef, cls: "warn", title: "Planned height exceeds the permitted maximum",
+      body: `Planned height is <strong>${hPlan.toFixed(2)} m</strong>, which exceeds the calculated maximum of <strong>${maxHeight.toFixed(2)} m</strong>.` });
+  }
+
+  // Development control gate (§6) — amended by 2020/R-9
+  if (loc === "non-residential" && shed && area > 0 && area <= 1200 && storeys <= 1) {
+    R.core.push({ ref: "6", cls: "info", title: "Exempt from development control (§6c)",
+      body: "Single-storey roofed building ≤ 1,200 sq ft on a non-residential island is <strong>exempt</strong> from Ministry development control." });
+  } else if (loc === "non-residential" || loc === "government" || loc === "industrial" || loc === "lagoon") {
+    R.core.push({ ref: "6", cls: "warn", title: "Ministry development control required",
+      body: "Design must go through the designated development controller <strong>before</strong> construction begins. Approval covers height, vacant space and parking (§6b)." });
+  } else if (loc === "non-city" && ((hPlan > 30.48) || (maxHeight !== null && maxHeight > 30.48))) {
+    R.core.push({ ref: "6", cls: "warn", title: "Ministry development control required (height > 30.48 m)",
+      body: "Non-city residential buildings exceeding 30.48 m need development-control approval — §6(a)(1) as amended by 2020/R-9." });
+  } else if (loc === "city") {
+    R.core.push({ ref: "6", cls: "warn", title: "Ministry development control required (city)",
+      body: "Buildings up to 30.48 m on residential land in cities need development-control approval — §6(a)(2)." });
+  } else if (loc === "non-city") {
+    NOT.push({ ref: "6", title: "Ministry development control", why: "Non-city residential building at or under 30.48 m — §6(a)(1) doesn't trigger." });
+  }
+
+  // §7(c) Construction Act reference
+  R.core.push({ ref: "7", cls: "info", title: "Construction Act governs anything else (§7c)",
+    body: "Matters not covered here follow the Construction Act (Act No. 4/2017) and the regulations made under it." });
+
+  // §6-1 Council-set maximum (2021/R-167)
+  if (council > 0) {
+    R.core.push({ ref: "6-1", cls: "warn", title: "Council-set maximum height governs (§6-1)",
+      body: `The council has set a maximum of <strong>${council.toFixed(2)} m</strong> for this island. This governs over §8 and §9 heights.` });
+  } else if (loc === "city" || loc === "non-city") {
+    NOT.push({ ref: "6-1", title: "Council-set maximum height (§6-1)", why: "No council-set maximum provided — the standard §8 / §9 heights apply." });
+  }
+
+  // Height (§8, §9)
+  if (loc === "non-city") {
+    R.height.push({ ref: "8", cls: heightProvisional ? "warn" : "", title: heightProvisional ? "Provisional non-city height — confirm with authority" : "Non-city residential height (§8)",
+      clauses: [...new Set([...heightWhy.matchAll(/§8([a-z])/g)].map((m) => m[1]))],
+      body: heightWhy ? `Applies: ${heightWhy}.` : "Enter plot area to see your specific cap." });
+  } else if (loc === "city") {
+    R.height.push({ ref: "9", cls: "", title: "City residential height (§9)",
+      clauses: [...new Set(heightBases.flatMap((basis) => [...basis.why.matchAll(/§9([a-z])/g)].map((m) => m[1])))],
+      body: "Height is the <em>lower</em> of: width-coefficient formula, footprint formula, and road-width cap. Try the calculator in Article 9." });
+  }
+
+  if (irregular) {
+    R.height.push({ ref: "14", cls: "warn", title: "Irregular plot — submit to Ministry (§14)",
+      body: "Because the plot shape prevents a normal determination, the max height must be set by the Ministry." });
+  } else {
+    NOT.push({ ref: "14", title: "Ministry height determination (§14)", why: "Your plot shape is regular — height is computed by the standard formulas." });
+  }
+
+  // Above-roof (§10) — always relevant if building is at meaningful height
+  if (maxHeight !== null && maxHeight >= 6) {
+    R.height.push({ ref: "10", cls: "", title: "Above-roof construction (§10)",
+      body: "Staircase/lift-room shelter ≤ 4 m above max height (1 m projection on roof OK). Extra roofing +4.921 ft over the beam. Up to two-thirds of terrace usable." });
+  }
+
+  // Ground floor raise (§11) — always show both variants
+  R.height.push({ ref: "11", cls: "info", title: "Ground-floor raising (§11)",
+    body: `<strong>(a)</strong> Ground floor may sit up to <strong>600 mm</strong> above ground/yard — the same amount is added to permissible height.<br><strong>(b)</strong> Where raised to provide parking beneath, the allowance is <strong>1.5 m</strong>, likewise added to overall height.${basement ? " <em>You have basement parking selected — the 1.5 m allowance applies.</em>" : ""}` });
+
+  // §13 Road width used
+  R.height.push({ ref: "13", cls: "info", title: "Which road width to use (§13)",
+    body: "On a <strong>subdivided plot</strong>, use the width of the main road on which the plot is located. On a road accessible from <strong>one end only</strong>, use the width of the main road." });
+
+  // §22 Subdivision alley
+  if (irregular || area > 0) {
+    R.structure.push({ ref: "22", cls: "info", title: "Subdivision alley — ≥ 4 ft (§22)",
+      body: "Where a residential plot is subdivided to include an alley, that alley shall be at least <strong>4 ft (1.219 m)</strong> wide." });
+  }
+
+  // §18(g) mechanical ventilation exemption
+  if (storeys > 0 && storeys <= 2) {
+    R.services.push({ ref: "18", cls: "info", title: "Mechanical-ventilation exemption for the lowest 2 floors (§18g)",
+      body: "If the <strong>lowest 2 floors</strong> (combined ≤ 7.5 m) are <strong>non-residential</strong> and adequately mechanically ventilated, they need not have the openings and vacant space in §18(a)(b)(c). The rest of the building still complies, and the void must be open from base to top. If those floors are ever used residentially, (a)(b)(c) apply." });
+  }
+
+  // Floor-to-ceiling (§12) — always shown
+  const isRes = loc === "city" || loc === "non-city";
+  R.services.push({ ref: "12", cls: "", title: "Floor-to-ceiling clearance (§12)",
+    body: `<strong>Residential floors</strong>: ≥ <strong>2.7 m (8.859 ft)</strong> floor to underside of slab or deck. <strong>Non-residential floors</strong>: ≥ <strong>2.5 m (8.202 ft)</strong>.${isRes ? " Your project is residential — the 2.7 m minimum applies to habitable floors." : " Your project is non-residential — the 2.5 m minimum applies."}` });
+
+  // Vacant space (§15) — amended by 2020/R-9
+  const effH = maxHeight != null ? maxHeight : hPlan;
+  // Non-city band (b): 1000+ sq ft, height 18.5–24.5 m
+  if (loc === "non-city" && area >= 1000 && effH >= 18.5 && effH < 24.5) {
+    R.structure.push({ ref: "15", cls: "warn", title: "5% vacant space + 0.75 m setback (§15b)",
+      body: `Non-city, footprint ≥ 1,000 sq ft, height 18.5–24.5 m → allocate <strong>${(area * 0.05).toFixed(0)} sq ft</strong> (5%) as unsheltered void on the road-facing side; setback ≥ <strong>0.75 m</strong> from plot edge on any two sides. Balconies may project into the setback from 6 m above ground, up to 50% of the side. Only 50% of the vacant space may be used for parking.` });
+  }
+  // Non-city band (c): 2000+ sq ft, height 24.5–30.48 m
+  else if (loc === "non-city" && area >= 2000 && effH >= 24.5 && effH <= 30.48) {
+    R.structure.push({ ref: "15", cls: "warn", title: "5% vacant space + 0.90 m setback (§15c)",
+      body: `Non-city, footprint ≥ 2,000 sq ft, height 24.5–30.48 m → allocate <strong>${(area * 0.05).toFixed(0)} sq ft</strong> (5%) as unsheltered void on the road-facing side; setback ≥ <strong>0.90 m</strong> from plot edge on any two sides. Only 50% of the vacant space may be used for parking.` });
+  }
+  // City band (d): 600 – 1200 sq ft, height 18.5–30.48 m
+  else if (loc === "city" && area >= 600 && area <= 1200 && effH >= 18.5 && effH <= 30.48) {
+    R.structure.push({ ref: "15", cls: "warn", title: "5% vacant space (§15d)",
+      body: `City, footprint 600–1,200 sq ft, height 18.5–30.48 m → allocate <strong>${(area * 0.05).toFixed(0)} sq ft</strong> (5%) as unsheltered void anywhere within the footprint. No specific setback prescribed.` });
+  }
+  // Default (a): 10% for footprints 1200+
+  else if (area >= 1200) {
+    R.structure.push({ ref: "15", cls: "warn", title: "10% vacant space (§15a)",
+      body: `Footprint ≥ 1,200 sq ft → allocate <strong>${(area * 0.1).toFixed(0)} sq ft</strong> (10%) of footprint as unsheltered vacant space. Roof drain may project 0.2 m from the building wall; door/window shutters may open into it. May be used for parking.` });
+  } else if (area > 0) {
+    NOT.push({ ref: "15", title: "Vacant-space allocation (§15)", why: `Footprint ${area.toFixed(0)} sq ft is under the 1,200 sq ft threshold and no §15(b)–(d) band applies.` });
+  }
+  // §15(e)(f) common — where any 5% applies
+  if ((loc === "non-city" && ((area >= 1000 && effH >= 18.5 && effH < 24.5) || (area >= 2000 && effH >= 24.5 && effH <= 30.48))) ||
+      (loc === "city" && area >= 600 && area <= 1200 && effH >= 18.5 && effH <= 30.48)) {
+    R.structure.push({ ref: "15", cls: "info", title: "Void depth & vent-count credit (§15e, §15f)",
+      body: "Wherever 5% is required, the open void shall be ≥ <strong>0.75 m</strong> deep. Unsheltered air vents ≥ 0.9 × 0.9 m may count toward the 5%." });
+  }
+
+  // §15-1 corner rounding
+  if (corner) {
+    R.structure.push({ ref: "15-1", cls: "warn", title: "Corner rounding — 12 ft radius (§15-1)",
+      body: "Corner plots abutting two roads → the corner of the building shall be rounded to a radius of <strong>12 ft (3.6576 m)</strong>, measured from the part of the plot adjacent to the road boundary." });
+  } else {
+    NOT.push({ ref: "15-1", title: "Corner rounding (§15-1)", why: "Not a corner plot on two roads." });
+  }
+
+  // Projections (§16-17)
+  R.structure.push({ ref: "16", cls: "", title: "Road-boundary projections (§16)",
+    body: "Roof/eave may only project into the road above 2.743 m (9 ft): 0.2 m if road < 6 ft, 0.457 m if wider." });
+  R.structure.push({ ref: "17", cls: "", title: "Doors, windows, fanlights (§17)",
+    body: "Must not project below 2.743 m from pavement level; above that, max 0.457 m outward." });
+
+  // Ventilation (§18) — universal
+  R.services.push({ ref: "18", cls: "", title: "Ventilation openings — 10% of each space's floor (§18a)",
+    body: "Each part of the building shall have openings facing unbuilt vacant space totalling ≥ <strong>10%</strong> of that part's floor area." });
+  R.services.push({ ref: "18", cls: "info", title: "Ventilation reach & void size (§18b, c)",
+    body: "An opening ventilates <strong>6 m</strong> from itself (or <strong>7.5 m</strong> if the opening is ≥ 15% of floor area). Unbuilt vacant space ≥ <strong>600 × 600 mm</strong>, or ≥ <strong>750 mm</strong> from an adjoining plot boundary. Ventilation shafts serving the §18(g) mixed-use exemption must be open to sky." });
+  R.services.push({ ref: "18", cls: "info", title: "No openings on shared boundary wall (§18d)",
+    body: "No opening of any kind — including fixed glass — in a wall built on the boundary of another plot. Any opening facing an adjoining plot shall be set back ≥ <strong>750 mm</strong>." });
+
+  // Roof / terrace parapet — always applicable
+  R.services.push({ ref: "19", cls: "", title: "Terrace / roof parapet — ≥ 1.2 m (§19a)",
+    body: "Railings or walls on <strong>terraces and roof accessible areas</strong> shall be at least <strong>1.2 m (3.94 ft)</strong> high, admit no <strong>125 mm</strong> sphere, and be non-climbable by children." });
+
+  // Balcony (only if selected)
+  if (balcony) {
+    R.services.push({ ref: "19", cls: "warn", title: "Balcony railing — ≥ 1.2 m (§19a)",
+      body: "Balcony railings/walls ≥ <strong>1.2 m</strong>, no gap admitting a 125 mm sphere, non-climbable. Windows opening onto balconies/terraces may be lower than 1 m above the floor (§19f)." });
+    R.services.push({ ref: "19", cls: "warn", title: "Wall at adjoining plot boundary — ≥ 2 m (§19b)",
+      body: "Where any building part (incl. balcony/terrace) adjoins another plot's boundary → wall or barrier ≥ <strong>2 m (6.562 ft)</strong>." });
+  } else {
+    NOT.push({ ref: "19", title: "Balcony-specific railings (§19a, b)", why: "No balconies in this project — the general terrace/roof parapet still applies." });
+  }
+
+  // Stairs (only if selected)
+  if (stairs) {
+    R.services.push({ ref: "19", cls: "", title: "Stair railing — ≥ 850 mm (§19d)",
+      body: "Stair railings/walls ≥ <strong>850 mm</strong>, child-safe. In service-only areas children won't enter, safe-but-not-childproof is acceptable." });
+  } else {
+    NOT.push({ ref: "19", title: "Stair railings (§19d)", why: "No stairs in this project." });
+  }
+
+  // Window heights — always applicable
+  R.services.push({ ref: "19", cls: "info", title: "Window sill — ≥ 1 m above floor (§19e)",
+    body: "Windows more than <strong>2.743 m (9 ft)</strong> above ground shall have a sill at least <strong>1 m (3.281 ft)</strong> above floor level. Exception: windows opening onto terraces/balconies (§19f)." });
+  R.services.push({ ref: "19", cls: "info", title: "Common-area vents — ≥ 1 m above floor (§19g)",
+    body: "A vent in a common area more than 2.743 m above ground that admits a <strong>125 mm</strong> sphere → sill ≥ <strong>1 m</strong> above floor." });
+
+  // Parking (§20)
+  if (area > 1200 && storeys > 5) {
+    R.services.push({ ref: "20", cls: "warn", title: "Parking required — 10% of footprint (§20)",
+      body: `Footprint > 1,200 sq ft AND > 5 storeys → reserve <strong>${(area * 0.1).toFixed(0)} sq ft</strong> for parking. Sections ≥ 5% of footprint each.` });
+  } else if (area > 0 && storeys > 0) {
+    NOT.push({ ref: "20", title: "Mandatory parking allocation (§20)", why: `Requires footprint > 1,200 sq ft AND > 5 storeys — your ${area.toFixed(0)} sq ft / ${storeys} storey${storeys === 1 ? "" : "s"} project doesn't meet both.` });
+  }
+
+  // Garbage (§21)
+  if (area >= 1000) {
+    R.services.push({ ref: "21", cls: "warn", title: "Waste disposal space required (§21)",
+      body: `Footprint ≥ 1,000 sq ft → allocate at least <strong>${(area * 0.015).toFixed(0)} sq ft</strong> (1.5%), no less than <strong>2 × 2 ft</strong>.` });
+  } else if (area > 0) {
+    NOT.push({ ref: "21", title: "Waste disposal space (§21)", why: `Footprint ${area.toFixed(0)} sq ft is under the 1,000 sq ft threshold.` });
+  }
+
+  // Side space (§23)
+  if (isRes) {
+    R.services.push({ ref: "23", cls: "info", title: "Gap between building and boundary (§23)",
+      body: "Where the building is not placed on the plot boundary, any gap left between the building and the boundary must be ≥ <strong>750 mm</strong>. Need not be on every side, but any gap provided must be accessible for cleaning." });
+  }
+
+  // Airport (§10f note + Civil Aviation LoNO from checklist)
+  if (airport) {
+    R.services.push({ ref: "10", cls: "warn", title: "Airport-adjacent antenna rules (§10f)",
+      body: "Antennas and dishes on buildings near an international airport must follow the responsible government agency's regulations." });
+    R.services.push({ ref: "10", cls: "ext", title: "Civil Aviation Letter of No Objection <span class=\"ext-tag\">External</span>",
+      body: "For any building near an international airport, a <strong>Letter of No Objection</strong> from the Civil Aviation Authority is required, and the design must follow that document.<br><em>Source: Civil Aviation Act / Checklist B1-AC2 §3.</em>" });
+  } else {
+    NOT.push({ ref: "10", title: "Airport-adjacent antenna rules & Civil Aviation LoNO", why: "Project is not near an international airport." });
+  }
+
+  // Balcony 50% projection inside §15(b) setback — explicit
+  if (balcony && loc === "non-city" && area >= 1000 && effH >= 18.5 && effH < 24.5) {
+    R.structure.push({ ref: "15", cls: "warn", title: "Balcony in §15(b) setback — 50% rule",
+      body: "Per §15(b) continued: below <strong>6 m (19.68 ft)</strong> above ground/pavement level, balconies may <strong>not</strong> project into the 0.75 m setback. From 6 m upward, balconies may project into the setback, but the projection is limited to <strong>50% of the length of the building side</strong> containing the setback." });
+  }
+
+  // Ventilation shaft — always show as a note (checklist emphasises this in multiple sections)
+  R.services.push({ ref: "18", cls: "info", title: "Ventilation shaft must be open to the top (checklist emphasis)",
+    body: "Any air shaft giving ventilation and light to parts of the building must be <strong>open from its base to the top</strong> and not enclosed by any intermediate floor along that height." });
+
+  // Step 3 items sourced from checklist / other regulations
+  R.core.push({ ref: "7", cls: "ext", title: "Foundation protection method <span class=\"ext-tag\">External</span>",
+    body: "Must be submitted with the building-permit application. <em>Source: Administrative Regulations on Construction; Checklist B1-AC2 §2.</em>" });
+  R.core.push({ ref: "7", cls: "ext", title: "Structural calculations <span class=\"ext-tag\">External</span>",
+    body: "Must be submitted with the building-permit application. <em>Source: Administrative Regulations on Construction; Checklist B1-AC2 §2.</em>" });
+  R.core.push({ ref: "7", cls: "ext", title: "Ventilation schedule / table <span class=\"ext-tag\">External</span>",
+    body: "A ventilation table must accompany the submission and match the floor plans and door/window schedule. <em>Source: drawing standards; Checklist B1-AC2 §2, §15.</em>" });
+
+  // Soil report — triggered by ≥ 5 floors OR planned height > 18 m
+  if ((storeys >= 5) || (effH > 18)) {
+    R.core.push({ ref: "7", cls: "ext warn", title: "Soil report required <span class=\"ext-tag\">External</span>",
+      body: `A soil report must be submitted for buildings <strong>≥ 5 floors or taller than 18 m</strong>${storeys >= 5 ? ` — you have ${storeys} storeys` : ""}${effH > 18 ? ` — your effective height is ${effH.toFixed(1)} m` : ""}. <em>Source: Administrative Regulations on Construction; Checklist B1-AC2 §2.</em>` });
+  } else if (storeys > 0 || effH > 0) {
+    NOT.push({ ref: "7", title: "Soil report", why: `Under both triggers (${storeys || 0} storeys, ${effH ? effH.toFixed(1) + " m" : "no height given"}) — soil report not required.` });
+  }
+
+  // Lift — checklist trigger > 5 storeys OR > 16.5 m (Islands regulation has no lift rule)
+  if ((storeys > 5) || (effH > 16.5)) {
+    R.services.push({ ref: "10", cls: "ext warn", title: "Lift required <span class=\"ext-tag\">External</span>",
+      body: `A lift must be included for buildings <strong>> 5 storeys or taller than 16.5 m</strong>${storeys > 5 ? ` — you have ${storeys} storeys` : ""}${effH > 16.5 ? ` — your effective height is ${effH.toFixed(1)} m` : ""}. <em>The Islands regulation itself has no lift rule; source: Administrative Regulations on Construction / Checklist B1-AC2 §2.</em>` });
+  } else if (storeys > 0 || effH > 0) {
+    NOT.push({ ref: "10", title: "Lift requirement", why: `Under both triggers (> 5 storeys or > 16.5 m). Islands regulation has no lift rule.` });
+  }
+
+  // Enforcement — always shown
+  // §24 non-residential use on residential land
+  if (loc === "city" || loc === "non-city") {
+    R.services.push({ ref: "24", cls: "info", title: "Non-residential uses on residential land (§24)",
+      body: "For sai-hotels, restaurants, cafés, bakeries, shops, workshops or warehouses on residential land, a separate permit procedure applies — issued by the Ministry within 60 days of publication of the regulation." });
+  }
+
+  R.enforcement.push({ ref: "26", cls: "info", title: "Enforcement procedure (§26)",
+    body: "Building-permit authority inspects on notification. Non-compliance → written notice with rectification period; if authority doesn't act in 30 days, referred to Ministry." });
+  R.enforcement.push({ ref: "27", cls: "warn", title: "Fines — up to MVR 100,000 per violation (§27, 2020/R-9)",
+    body: "As amended: fine <strong>not exceeding MVR 100,000</strong> per violation, imposed with a rectification period based on gravity. Overrun: +<strong>3%</strong> of the fine per day. Unpaid → Attorney General's Office." });
+  R.enforcement.push({ ref: "25", cls: "info", title: "Planning Committee — edge cases (§25)",
+    body: "Matters within the purpose of this regulation that aren't expressly provided for are decided by the <strong>Planning Committee</strong> appointed by the Minister. Its decisions are binding." });
+
+  // Compose
+  const sec = (title, arr) => arr.length ? `<div class="section-head">${title}</div>` + arr.map((r) => `
+    <div class="rule ${r.cls}">
+      <div class="rule-head">
+        <div class="rule-title">${r.title}</div>
+        <div class="rule-ref">${link(r.ref, r.ref.match(/^\d+$/) ? "Art. " + r.ref : r.ref.toUpperCase(), ruleClauses(r))} ↗</div>
+      </div>
+      <div class="rule-body">${r.body}</div>
+    </div>`).join("") : "";
+
+  const legend = `<div class="legend">
+    <div class="legend-item"><div class="legend-dot warn"></div><span><strong style="color:var(--ink)">Action / threshold</strong> — mandatory requirement or approval</span></div>
+    <div class="legend-item"><div class="legend-dot std"></div><span><strong style="color:var(--ink)">Standard rule</strong> — comply in design</span></div>
+    <div class="legend-item"><div class="legend-dot info"></div><span><strong style="color:var(--ink)">Info</strong> — context or an allowance</span></div>
+  </div>`;
+
+  const notReq = NOT.length ? `<details class="not-req">
+    <summary>Not required for this project (${NOT.length})</summary>
+    <div class="nr-inner">${NOT.map((n) => `<div class="nr-item"><div><span class="nr-ref">${link(n.ref, n.ref.match(/^\d+$/) ? "Art. " + n.ref : n.ref.toUpperCase(), ruleClauses({ ...n, body: n.why }))} ↗</span><span class="nr-title">${n.title}</span></div><div class="nr-why">${n.why}</div></div>`).join("")}</div>
+  </details>` : "";
+
+  const html = legend + summaryHTML
+    + sec("Permitting & core", R.core)
+    + sec("Height & levels", R.height)
+    + sec("Structure & projections", R.structure)
+    + sec("Services & safety", R.services)
+    + sec("Enforcement", R.enforcement)
+    + notReq;
+
+  $("r").innerHTML = html;
+}
+
+render();
+
+// Theme picker
+const root = document.documentElement;
+function applyTheme() {
+  const name = localStorage.getItem("themeName") || "modern";
+  const mode = localStorage.getItem("themeMode") || "system";
+  root.setAttribute("data-theme-name", name === "classic" ? "classic" : "modern");
+  if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode);
+  else root.removeAttribute("data-theme");
+  document.querySelectorAll("#theme-name-picker button").forEach((b) => b.classList.toggle("on", b.dataset.name === name));
+  document.querySelectorAll("#theme-mode-picker button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
+}
+document.querySelectorAll("#theme-name-picker button").forEach((b) => {
+  b.addEventListener("click", () => { try { localStorage.setItem("themeName", b.dataset.name); } catch(e) {} applyTheme(); });
+});
+document.querySelectorAll("#theme-mode-picker button").forEach((b) => {
+  b.addEventListener("click", () => { try { localStorage.setItem("themeMode", b.dataset.mode); } catch(e) {} applyTheme(); });
+});
+applyTheme();
+
+// Export JSON
+document.getElementById("export-json").addEventListener("click", async () => {
+  const payload = {
+    version: 1,
+    exported: new Date().toISOString(),
+    rulesChecker: safeJson(localStorage.getItem('islands-checker-v1')),
+    checklist: safeJson(localStorage.getItem('islands-checklist-v1')),
+    plotDetails: safeJson(localStorage.getItem('islands-project-details-v1')),
+    professionalsRoster: safeJson(localStorage.getItem('islands-pro-roster-v1')),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'project.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+function safeJson(s) { try { return JSON.parse(s || 'null'); } catch(e) { return null; } }
+
+document.getElementById("import-json").addEventListener("click", () => document.getElementById("import-file").click());
+document.getElementById("print-report").addEventListener("click", () => window.print());
+document.getElementById("import-file").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const project = JSON.parse(await file.text());
+    if (!project || typeof project !== "object") throw new Error();
+    const entries = [
+      [STORE_KEY, project.rulesChecker],
+      ["islands-checklist-v1", project.checklist],
+      ["islands-project-details-v1", project.plotDetails],
+      ["islands-pro-roster-v1", project.professionalsRoster],
+    ];
+    if (!entries.some(([, value]) => value && typeof value === "object")) throw new Error();
+    entries.forEach(([key, value]) => { if (value && typeof value === "object") localStorage.setItem(key, JSON.stringify(value)); });
+    location.reload();
+  } catch (err) {
+    alert("That file is not a valid Islands Navigator project export.");
+  } finally {
+    e.target.value = "";
+  }
+});
+
+// Side-panel reference viewer — renders inline from GUIDE_ARTICLES
+const panel = document.getElementById("side-panel");
+const panelTitle = document.getElementById("side-panel-title");
+const panelBody = document.getElementById("side-panel-body");
+function openPanelById(id, label, clauses = []) {
+  const art = GUIDE_ARTICLES[id];
+  panelTitle.textContent = label || (art ? art.title : "Reference");
+  if (art) {
+    const displayId = id === "6-1" ? "6" : id;
+    panelBody.innerHTML = `<div class="art-num">Article ${displayId}</div><h2>${art.title}</h2>${art.body}`;
+    panelBody.scrollTop = 0;
+    const highlights = [];
+    if (id === "6-1") {
+      const subarticle = panelBody.querySelector("#a6-1");
+      if (subarticle) highlights.push(subarticle);
+    }
+    clauses.forEach((clause) => {
+      panelBody.querySelectorAll("strong").forEach((strong) => {
+        if (strong.textContent.trim().toLowerCase() !== `(${clause})`) return;
+        const target = strong.closest("p, li, tr");
+        if (target && !highlights.includes(target)) highlights.push(target);
+      });
+      panelBody.querySelectorAll('ol[type="a"]').forEach((list) => {
+        const target = Array.from(list.children).filter((child) => child.tagName === "LI")[clause.charCodeAt(0) - 97];
+        if (target && !highlights.includes(target)) highlights.push(target);
+      });
+    });
+    highlights.forEach((target) => target.classList.add("relevant-clause"));
+    if (highlights[0]) requestAnimationFrame(() => highlights[0].scrollIntoView({ block: "center" }));
+  } else {
+    panelBody.innerHTML = `<p><em>Article ${id} not found. <a href="${ART_URL}#a${id}" target="_blank">Open in guideline ↗</a></em></p>`;
+  }
+  panel.classList.add("open");
+  panel.setAttribute("aria-hidden", "false");
+  document.body.classList.add("has-panel");
+  document.getElementById("side-panel-close").focus();
+}
+function closePanel() {
+  panel.classList.remove("open");
+  panel.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("has-panel");
+}
+document.getElementById("side-panel-close").addEventListener("click", closePanel);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && panel.classList.contains("open")) closePanel(); });
+document.addEventListener("click", (e) => {
+  const a = e.target.closest(".rule-ref a, .nr-ref a");
+  if (!a) return;
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const m = a.href.match(/#a([\w-]+)/);
+  if (!m) return;
+  openPanelById(m[1], a.textContent.replace(/ ↗$/, ""), (a.dataset.clauses || "").split(",").filter(Boolean));
+});
+</script>

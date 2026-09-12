@@ -1,0 +1,47 @@
+{
+  "instructions": "Set enabled to true or false, edit the display text if needed, then run bash build-downloads.sh.",
+  "files": [
+    {
+      "enabled": true,
+      "section": "Regulation - Original and amendments",
+      "title": "2019-R-1002 - Regulation on Building in Islands or Lagoons Without Planning Rules - Original - 2019-03-09.pdf",
+      "description": "Original Dhivehi regulation.",
+      "source": "sources/regulation/2019-R-1002 - Regulation on Building in Islands or Lagoons Without Planning Rules - Original - 2019-03-09.pdf",
+      "filename": "2019-R-1002 - Regulation on Building in Islands or Lagoons Without Planning Rules - Original - 2019-03-09.pdf"
+    },
+    {
+      "enabled": true,
+      "section": "Regulation - Original and amendments",
+      "title": "2020-R-9 - Regulation on Building in Islands or Lagoons Without Planning Rules - First Amendment - 2020-10-14.pdf",
+      "subitem": true,
+      "description": "Original Dhivehi first amendment.",
+      "source": "sources/regulation/2020-R-9 - Regulation on Building in Islands or Lagoons Without Planning Rules - First Amendment - 2020-10-14.pdf",
+      "filename": "2020-R-9 - Regulation on Building in Islands or Lagoons Without Planning Rules - First Amendment - 2020-10-14.pdf"
+    },
+    {
+      "enabled": true,
+      "section": "Regulation - Original and amendments",
+      "title": "2021-R-167 - Regulation on Building in Islands or Lagoons Without Planning Rules - Second Amendment - 2021-12-14.pdf",
+      "subitem": true,
+      "description": "Original Dhivehi second amendment.",
+      "source": "sources/regulation/2021-R-167 - Regulation on Building in Islands or Lagoons Without Planning Rules - Second Amendment - 2021-12-14.pdf",
+      "filename": "2021-R-167 - Regulation on Building in Islands or Lagoons Without Planning Rules - Second Amendment - 2021-12-14.pdf"
+    },
+    {
+      "enabled": true,
+      "section": "Regulation - Consolidated English",
+      "title": "2019-r-1002-consolidated-second-amendment-en.pdf",
+      "description": "PDF generated from the final reviewed Markdown used by the webapp.",
+      "source": "sources/regulation/2019-r-1002-consolidated-second-amendment-en.pdf",
+      "filename": "2019-r-1002-consolidated-second-amendment-en.pdf"
+    },
+    {
+      "enabled": true,
+      "section": "Architectural checklist",
+      "title": "Checklist B1-AC2 Architectural Checklist for Islands.pdf",
+      "description": "Original fillable Dhivehi architectural checklist.",
+      "source": "sources/checklists/Checklist B1-AC2 Architectural Checklist for Islands.pdf",
+      "filename": "Checklist B1-AC2 Architectural Checklist for Islands.pdf"
+    }
+  ]
+}

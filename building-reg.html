@@ -1,0 +1,1638 @@
+<meta charset="utf-8">
+<title>Maldives Building Regulation Navigator</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+/>
+<style>
+  :root {
+    --ground: #f6f4ef;
+    --panel: #ffffff;
+    --ink: #1a1e2b;
+    --ink-soft: #4a5163;
+    --muted: #8a8f9e;
+    --line: #e4e0d6;
+    --line-strong: #cfcabd;
+    --accent: #1f3b5c;
+    --accent-soft: #e8eef6;
+    --mark: #fde58a;
+    --chip: #ecebe4;
+  }
+  :root:not([data-theme="light"]) {
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14161c;
+      --panel: #1c1f28;
+      --ink: #ecece8;
+      --ink-soft: #b8bcc7;
+      --muted: #838896;
+      --line: #2b2f3a;
+      --line-strong: #3a3f4d;
+      --accent: #8bb3ea;
+      --accent-soft: #21304a;
+      --mark: #7a6412;
+      --chip: #262a34;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #14161c;
+    --panel: #1c1f28;
+    --ink: #ecece8;
+    --ink-soft: #b8bcc7;
+    --muted: #838896;
+    --line: #2b2f3a;
+    --line-strong: #3a3f4d;
+    --accent: #8bb3ea;
+    --accent-soft: #21304a;
+    --mark: #7a6412;
+    --chip: #262a34;
+  }
+
+  /* Modern theme — cool neutrals, sans only, tighter */
+  :root[data-theme-name="modern"] {
+    --ground: #fafafa;
+    --panel: #ffffff;
+    --ink: #0a0a0a;
+    --ink-soft: #404040;
+    --muted: #737373;
+    --line: #e5e5e5;
+    --line-strong: #d4d4d4;
+    --accent: #171717;
+    --accent-soft: #f5f5f5;
+    --mark: #fef3c7;
+    --chip: #f5f5f5;
+  }
+  :root[data-theme-name="modern"][data-theme="dark"],
+  :root[data-theme-name="modern"]:not([data-theme="light"]) {
+    /* system-follow default in modern: reset with media query */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme-name="modern"]:not([data-theme="light"]) {
+      --ground: #0a0a0a;
+      --panel: #171717;
+      --ink: #fafafa;
+      --ink-soft: #a3a3a3;
+      --muted: #737373;
+      --line: #262626;
+      --line-strong: #404040;
+      --accent: #fafafa;
+      --accent-soft: #262626;
+      --mark: #52441c;
+      --chip: #262626;
+    }
+  }
+  :root[data-theme-name="modern"][data-theme="dark"] {
+    --ground: #0a0a0a;
+    --panel: #171717;
+    --ink: #fafafa;
+    --ink-soft: #a3a3a3;
+    --muted: #737373;
+    --line: #262626;
+    --line-strong: #404040;
+    --accent: #fafafa;
+    --accent-soft: #262626;
+    --mark: #52441c;
+    --chip: #262626;
+  }
+  :root[data-theme-name="modern"] body { font-family: 'Inter', system-ui, sans-serif; }
+  :root[data-theme-name="modern"] h1,
+  :root[data-theme-name="modern"] h2,
+  :root[data-theme-name="modern"] .brand,
+  :root[data-theme-name="modern"] .art-title,
+  :root[data-theme-name="modern"] .art-num,
+  :root[data-theme-name="modern"] .toc-chapter,
+  :root[data-theme-name="modern"] .section-head,
+  :root[data-theme-name="modern"] .qr-title { font-family: 'Inter', sans-serif !important; letter-spacing: -0.01em; }
+  :root[data-theme-name="modern"] .header h1 { font-weight: 700; }
+  :root[data-theme-name="modern"] section.article { box-shadow: none; border-radius: 4px; }
+  :root[data-theme-name="modern"] .quickref a { border-radius: 4px; }
+  :root[data-theme-name="modern"] .chip { border-radius: 4px; }
+  :root[data-theme-name="modern"] section.article.chapter-head p { font-weight: 600; }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: 100vh;
+  }
+  /* Sidebar */
+  aside {
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 22px 18px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .brand {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.15;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .brand small {
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .search {
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    padding: 10px 12px 10px 34px;
+    border: 1px solid var(--line-strong);
+    background: var(--ground);
+    color: var(--ink);
+    border-radius: 8px;
+    font: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search input:focus {
+    border-color: var(--accent);
+  }
+  .search svg {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+  }
+  .search-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    min-height: 14px;
+  }
+  .toc {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .toc-chapter {
+    font-family: "Fraunces", serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    margin: 12px 0 4px;
+    padding: 0 6px;
+  }
+  .toc a {
+    display: flex;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  .toc a .num {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 22px;
+  }
+  .toc a:hover {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  .toc a.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .toc a.hidden {
+    display: none;
+  }
+  .toc-chapter.hidden {
+    display: none;
+  }
+
+  /* Main */
+  main {
+    padding: 40px 56px 120px;
+    max-width: 820px;
+  }
+  .header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  .header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-family: "Fraunces", serif;
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    margin-top: 12px;
+  }
+  .chip {
+    background: var(--chip);
+    color: var(--ink-soft);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .chip.amend-chip { background: var(--accent-soft); color: var(--accent); }
+  .amend {
+    display: inline-block;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin: 0 2px;
+  }
+  .art-body blockquote {
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-left: 3px solid var(--line-strong);
+    background: var(--ground);
+    border-radius: 0 6px 6px 0;
+    color: var(--ink-soft);
+    font-style: italic;
+    font-size: 13.5px;
+  }
+  details.doc-note {
+    margin: 10px 0;
+    background: var(--ground);
+    border-left: 3px solid var(--line-strong);
+    border-radius: 0 6px 6px 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  details.doc-note summary {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+  details.doc-note summary::-webkit-details-marker { display: none; }
+  details.doc-note summary::after { content: "+"; color: var(--muted); font-size: 15px; font-weight: 400; }
+  details.doc-note[open] summary::after { content: "−"; }
+  details.doc-note summary:hover { color: var(--ink-soft); }
+  details.doc-note > div {
+    padding: 4px 14px 12px;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    font-style: italic;
+  }
+
+  .theme-picker { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+  .theme-picker label { font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .theme-picker .row { display: flex; gap: 4px; }
+  .theme-picker button { flex: 1; background: transparent; border: 1px solid var(--line-strong); color: var(--ink-soft); padding: 5px 8px; border-radius: 5px; font: inherit; font-size: 11.5px; cursor: pointer; }
+  .theme-picker button.on { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+  .theme-picker button:hover:not(.on) { background: var(--accent-soft); }
+
+  /* Section */
+  section.article {
+    padding: 22px 24px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+    margin-bottom: 14px;
+    scroll-margin-top: 20px;
+  }
+  section.article.chapter-head {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 24px 0 10px;
+    border-radius: 0;
+    margin-top: 32px;
+    margin-bottom: 8px;
+  }
+  section.article.chapter-head h2 {
+    font-family: "Fraunces", serif;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+  section.article.chapter-head p {
+    font-family: "Fraunces", serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 6px 0 0;
+    line-height: 1.2;
+  }
+  section.article.hidden {
+    display: none;
+  }
+  .subarticle { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .source-note { margin-bottom: 14px; }
+
+  .art-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .art-num {
+    font-family: "Fraunces", serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 32px;
+  }
+  .art-title {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 19px;
+    color: var(--ink);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  .art-body {
+    color: var(--ink-soft);
+  }
+  .art-body p {
+    margin: 8px 0;
+  }
+  .art-body ol,
+  .art-body ul {
+    margin: 8px 0;
+    padding-left: 22px;
+  }
+  .art-body ol ol,
+  .art-body ol ul,
+  .art-body ul ol,
+  .art-body ul ul {
+    margin: 6px 0 6px;
+    padding-left: 28px;
+  }
+  .art-body ol ol ol {
+    padding-left: 32px;
+  }
+  .art-body li {
+    margin: 4px 0;
+  }
+  .art-body strong {
+    color: var(--ink);
+  }
+  .art-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin: 12px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .art-body th,
+  .art-body td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .art-body th {
+    color: var(--ink);
+    font-weight: 600;
+    background: var(--ground);
+  }
+  .tag {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .calc {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 10px;
+  }
+  .calc-head {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+  .calc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .calc-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+    gap: 4px;
+  }
+  .calc-grid input {
+    padding: 8px 10px;
+    border: 1px solid var(--line-strong);
+    background: var(--panel);
+    color: var(--ink);
+    border-radius: 6px;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+  }
+  .calc-grid input:focus {
+    border-color: var(--accent);
+  }
+  .calc-out {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--panel);
+    border-radius: 8px;
+    font-family: "Fraunces", serif;
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .calc-out .big {
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 22px;
+  }
+  .calc-out ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    font-family: "Inter", sans-serif;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .lab-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .unit-toggle {
+    display: inline-flex;
+    border: 1px solid var(--line-strong);
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  .unit-toggle button {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 10.5px;
+    padding: 2px 7px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .unit-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  :root[data-theme="dark"] .unit-toggle button.active,
+  :root:not([data-theme="light"]) .unit-toggle button.active {
+    color: var(--ground);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .unit-toggle button.active {
+      color: var(--ground);
+    }
+  }
+  .mini-check {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: var(--muted) !important;
+    margin-top: 4px;
+    cursor: pointer;
+  }
+  .mini-check input { width: auto; }
+  .sub-inputs {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .sub-inputs input { flex: 1; }
+  .calc-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+  mark {
+    background: var(--mark);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 60px 20px;
+    font-style: italic;
+  }
+
+  /* Quick reference cards */
+  .quickref {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 20px 0 8px;
+  }
+  .quickref a {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    text-decoration: none;
+    color: var(--ink);
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+  .quickref a:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .quickref .qr-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .quickref .qr-title {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  #bot-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.18);
+    z-index: 100;
+    transition: transform 0.15s;
+  }
+  :root[data-theme="dark"] #bot-fab, :root:not([data-theme="light"]) #bot-fab { color: var(--ground); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) #bot-fab { color: var(--ground); }
+  }
+  #bot-fab:hover { transform: translateY(-2px); }
+  #bot-fab svg { width: 18px; height: 18px; }
+  #bot-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    height: 560px;
+    max-height: calc(100vh - 40px);
+    background: var(--panel);
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+    display: flex;
+    flex-direction: column;
+    z-index: 101;
+    overflow: hidden;
+  }
+  .bot-head {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-soft);
+  }
+  .bot-title {
+    font-family: "Fraunces", serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .bot-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  #bot-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  #bot-close:hover { background: var(--panel); color: var(--ink); }
+  .bot-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .bot-msg {
+    padding: 10px 12px;
+    border-radius: 10px;
+    max-width: 88%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .bot-msg.assistant {
+    background: var(--ground);
+    color: var(--ink);
+    align-self: flex-start;
+    border: 1px solid var(--line);
+  }
+  .bot-msg.user {
+    background: var(--accent);
+    color: #fff;
+    align-self: flex-end;
+  }
+  :root[data-theme="dark"] .bot-msg.user, :root:not([data-theme="light"]) .bot-msg.user { color: var(--ground); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .bot-msg.user { color: var(--ground); }
+  }
+  .bot-msg.error {
+    background: transparent;
+    border: 1px dashed var(--line-strong);
+    color: var(--muted);
+    font-style: italic;
+    align-self: flex-start;
+  }
+  .bot-msg em { font-style: italic; color: var(--ink-soft); }
+  .bot-form {
+    padding: 10px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 6px;
+    background: var(--panel);
+  }
+  #bot-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--ground);
+    color: var(--ink);
+    font: inherit;
+    outline: none;
+  }
+  #bot-input:focus { border-color: var(--accent); }
+  #bot-send {
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  :root[data-theme="dark"] #bot-send, :root:not([data-theme="light"]) #bot-send { color: var(--ground); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) #bot-send { color: var(--ground); }
+  }
+  #bot-send:disabled { opacity: 0.5; cursor: default; }
+
+  @media (max-width: 800px) {
+    .app {
+      grid-template-columns: 1fr;
+    }
+    aside {
+      position: static;
+      height: auto;
+      max-height: 45vh;
+    }
+    main {
+      padding: 28px 20px 80px;
+    }
+    .header h1 {
+      font-size: 26px;
+    }
+  }
+  .topnav { position: sticky; top: 0; z-index: 90; background: var(--panel); border-bottom: 1px solid var(--line); padding: 12px 24px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; box-shadow: 0 8px 28px rgba(20, 30, 50, .08); }
+  .topnav .nav-brand { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); margin-right: 6px; }
+  .topnav a { color: var(--ink-soft); text-decoration: none; font-size: 13px; padding: 4px 2px; border-bottom: 2px solid transparent; }
+  .topnav a:hover { color: var(--ink); }
+  .topnav a.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  :root[data-theme-name="modern"] { --ground:#f6f7fb; --panel:#fff; --ink:#111827; --ink-soft:#4b5563; --muted:#7c8493; --line:#e5e7eb; --line-strong:#cbd5e1; --accent:#4f46e5; --accent-soft:#eef2ff; --chip:#f1f5f9; }
+  :root[data-theme-name="modern"][data-theme="dark"] { --ground:#090c14; --panel:#111827; --ink:#f8fafc; --ink-soft:#cbd5e1; --muted:#8993a4; --line:#263244; --line-strong:#3c4a60; --accent:#a5b4fc; --accent-soft:#202a52; --chip:#1e293b; }
+  @media (prefers-color-scheme: dark) { :root[data-theme-name="modern"]:not([data-theme="light"]) { --ground:#090c14; --panel:#111827; --ink:#f8fafc; --ink-soft:#cbd5e1; --muted:#8993a4; --line:#263244; --line-strong:#3c4a60; --accent:#a5b4fc; --accent-soft:#202a52; --chip:#1e293b; } }
+  section.article, .quickref a, .chip, button, input { transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+  section.article { box-shadow: 0 10px 30px rgba(20, 30, 50, .055); }
+  .quickref a:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(20, 30, 50, .10); }
+  aside { top: 47px !important; height: calc(100vh - 47px) !important; }
+</style>
+<link rel="stylesheet" href="ui-theme.css">
+
+<nav class="topnav">
+  <div class="nav-brand">Maldives Building Regulation Navigator</div>
+  <a class="on" href="#">Guideline</a>
+  <a href="islands-checker.html">Rules Checker</a>
+  <a href="checklist.html">Checklist</a>
+  <a href="downloads.html">Downloads</a>
+  <div class="theme-controls">
+    <div class="grp" id="theme-name-picker">
+      <button data-name="classic">Classic</button>
+      <button data-name="modern">Modern</button>
+    </div>
+    <div class="grp" id="theme-mode-picker">
+      <button data-mode="light" aria-label="Light mode">☀</button>
+      <button data-mode="system" aria-label="System mode">◑</button>
+      <button data-mode="dark" aria-label="Dark mode">☾</button>
+    </div>
+  </div>
+</nav>
+
+<div class="app">
+  <aside>
+    <div class="brand">
+      <small>Regulation Navigator</small>
+      <a class="sidebar-title-link" href="#" aria-label="Back to the top">Building in Islands or Lagoons Without Planning Rules</a>
+    </div>
+    <div class="search">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3-3" />
+      </svg>
+      <input
+        id="q"
+        type="search"
+        placeholder="Search articles, terms, numbers…"
+        autocomplete="off"
+      />
+      <div class="search-meta" id="meta"></div>
+    </div>
+    <nav class="toc" id="toc"></nav>
+  </aside>
+
+  <main>
+    <div class="header">
+      <div class="eyebrow">
+        Case 2019/R-1002 · Consolidated to 2nd Amendment (2021/R-167, 14 Dec 2021)
+      </div>
+      <h1>Building in Islands or Lagoons Without Planning Rules</h1>
+      <div style="color: var(--ink-soft); font-size: 14px">
+        Ministry of National Planning and Infrastructure · Republic of Maldives
+        · Made under §95 of the Construction Act (Act No. 4/2017)
+      </div>
+      <div class="meta-row">
+        <span class="chip">29 Articles (inc. 6-1, 15-1)</span>
+        <span class="chip">10 Chapters</span>
+        <span class="chip">3 Reference Tables · Schedule 1</span>
+        <span class="chip amend-chip">Amended 2020/R-9 · 2021/R-167</span>
+      </div>
+    </div>
+
+    <div class="quickref">
+      <a href="#a8"
+        ><div class="qr-label">Common lookup</div>
+        <div class="qr-title">Height limits — non-city</div></a
+      >
+      <a href="#a9"
+        ><div class="qr-label">Common lookup</div>
+        <div class="qr-title">Height limits — cities</div></a
+      >
+      <a href="#a20"
+        ><div class="qr-label">Common lookup</div>
+        <div class="qr-title">Parking requirements</div></a
+      >
+      <a href="#a27"
+        ><div class="qr-label">Common lookup</div>
+        <div class="qr-title">Fines & enforcement</div></a
+      >
+      <a href="#a5"
+        ><div class="qr-label">Common lookup</div>
+        <div class="qr-title">Definitions</div></a
+      >
+      <a href="#atbl1"
+        ><div class="qr-label">Reference</div>
+        <div class="qr-title">Height tables 1–3</div></a
+      >
+      <a href="#a6-1"
+        ><div class="qr-label">Council override</div>
+        <div class="qr-title">§6-1 · Council height cap</div></a
+      >
+      <a href="#a15-1"
+        ><div class="qr-label">Corner plot</div>
+        <div class="qr-title">§15-1 · 12 ft rounding</div></a
+      >
+    </div>
+
+    <div id="content"></div>
+    <footer class="site-footer">Navigator prepared by <strong>Arkido Studio</strong>.</footer>
+  </main>
+</div>
+
+<script>
+  const DATA = [
+    { chapter: "Chapter One", chapterTitle: "Preliminary" },
+    {
+      id: "1",
+      title: "Title and Authority",
+      body: `<p><strong>(a)</strong> Made under Section 95 of the Construction Act (Act No. 4/2017), to prescribe how buildings are to be built in islands or lagoons where no planning rules are in force.</p><p><strong>(b)</strong> Cited as the <strong>"Regulation on Building in Islands or Lagoons Without Planning Rules."</strong></p>`,
+    },
+    {
+      id: "2",
+      title: "Purpose",
+      body: `<p><strong>(a)</strong> Set the criteria for determining building height in islands or lagoons where no planning rules are in force.</p><p><strong>(b)</strong> Ensure buildings in those places are safe and healthy.</p><p><strong>(c)</strong> Set out the measures to be taken against violators, and identify who takes them.</p>`,
+    },
+    {
+      id: "3",
+      title: "Enforcement Authority",
+      body: `<p>The Ministry responsible for construction policy, and the agencies it designates to issue construction permits.</p>`,
+    },
+    {
+      id: "4",
+      title: "Effective Date",
+      body: `<p><strong>60 (sixty) days</strong> after publication in the Government Gazette.</p>`,
+    },
+    {
+      id: "5",
+      title: "Definitions",
+      body: `<ul>
+    <li><strong>"Ministry"</strong> — The Government Ministry responsible for construction policy.</li>
+    <li><strong>"Minister"</strong> — The Minister of that Ministry.</li>
+    <li><strong>"Lagoon"</strong> (<em>falhu</em>) — The area from the island's shoreline to the outer edge of the reef, or the area enclosed by the reef and reef flat.</li>
+    <li><strong>"City"</strong> — An island or administrative area designated a city by the Government.</li>
+    <li><strong>"Development control"</strong> — The planning standards for the site under construction.</li>
+    <li><strong>"Land"</strong> — State (Bandaara) land and private land.</li>
+    <li><strong>"Road"</strong> — The main road, street or lane adjoining the building, or the road leading to a subdivided plot.</li>
+    <li><strong>"Road width"</strong> — Boundary to boundary across the road, not the paved width.</li>
+    <li><strong>"Building footprint"</strong> — The ground-floor built area, excluding vacant space left unbuilt on that floor.</li>
+    <li><strong>"Building width coefficient"</strong> — Building area ÷ the building's greatest external length.
+      <ol><li>Calculated in metres; area expressed in square metres.</li>
+      <li>Where the dimensions of a plot make the coefficient impossible to obtain, the Ministry determines both the coefficient and the maximum height.</li></ol>
+    </li>
+    <li><strong>"Opening"</strong> — A window, vent or similar that opens. Glass blocks used only for light, and the non-opening part of a sliding unit, are excluded.</li>
+    <li><strong>"Building Code"</strong> — The standards to be observed in construction.</li>
+    <li><strong>"Compliance Document"</strong> — The documents of rules and standards issued under the Building Code.</li>
+    <li><strong>"Ramp"</strong> — A sloped surface used to ascend to or descend from a raised level.</li>
+    <li><strong>"Construction Act" / "Act"</strong> — Act No. 4/2017 and its amendments.</li>
+  </ul>`,
+    },
+
+    { chapter: "Chapter Two", chapterTitle: "Construction Practice" },
+    {
+      id: "6",
+      title: "Design Under Development Control",
+      body: `<p><strong>(a)</strong> <span class="amend">[2020/R-9]</span> In the following cases, development control shall be obtained from the Ministry and the building designed in accordance with it:</p>
+  <ol>
+    <li><span class="amend">[2020/R-9]</span> buildings exceeding <strong>30.48 m (100 ft)</strong> in height on land allocated for residential purposes, on islands <em>other than</em> those designated cities;</li>
+    <li>buildings up to 30.48 m on residential land in islands designated cities;</li>
+    <li>land allocated by the Government for development purposes;</li>
+    <li>land designated an industrial zone or economic zone;</li>
+    <li>islands other than inhabited islands;</li>
+    <li>lagoons.</li>
+  </ol>
+  <p><strong>(b)</strong> Development control shall address building height, vacant space, parking and similar standards.</p>
+  <p><strong>(c)</strong> Notwithstanding (a)(5), a single-storey roofed building with a gross floor area not exceeding <strong>1,200 sq ft</strong>, on a non-residential island, need not comply with development control.</p>
+  <div class="subarticle" id="a6-1"><div class="art-head"><div class="art-num">Art. 6-1</div><div class="art-title">Determination of Maximum Building Height by the Council</div></div>
+  <p><em>Added by <span class="amend">[2021/R-167]</span>.</em></p>
+  <p><strong>(a)</strong> The council of an inhabited island may set the maximum height of buildings on that island, up to <strong>30.48 m</strong>. Where a council does so:</p>
+  <ol>
+    <li>the decision shall be published in the Government Gazette, together with the date it comes into force;</li>
+    <li>the decision shall be given to the Ministry in writing.</li>
+  </ol>
+  <blockquote>A determination made by the council governs. The heights arrived at under Articles 8 and 9 are the general position and yield to it. This Article applies to island councils and city councils alike.</blockquote></div>`,
+    },
+    {
+      id: "7",
+      title: "Other Construction",
+      body: `<p><strong>(a)</strong> Structures other than those in Article 6(a) shall be designed and built to the planning standards in this regulation.</p><p><strong>(b)</strong> Where development control under Article 6(b) sets rules and standards, those shall be observed in the design.</p><p><strong>(c)</strong> All other construction matters follow the Construction Act and its regulations.</p>`,
+    },
+
+    { chapter: "Chapter Three", chapterTitle: "Height of Buildings on Residential Land" },
+    { sourceNote: `Height is measured from <strong>pavement level</strong> to the top of the <strong>roof beam, terrace slab or deck</strong>. Construction above that level is governed by Article 10. Heights under this Chapter apply in a manner that does not conflict with <strong>Article 6-1</strong> — where the council has determined a maximum height for the island, that determination governs. <span class="amend">[2021/R-167]</span>` },
+    {
+      id: "8",
+      title: "Height — Residential Land on Islands Other Than Cities",
+      body: `<p><em>Opening phrase replaced by <span class="amend">[2021/R-167]</span>; paragraphs (c) to (f) substituted and added by <span class="amend">[2020/R-9]</span>.</em></p>
+  <p>For a building on a plot allocated for residential purposes on an island other than a city, the maximum height is determined as below, in a manner that does not conflict with Article 6-1.</p>
+  <table><thead><tr><th></th><th>Building footprint</th><th>Access road / alley width</th><th>Maximum height</th></tr></thead><tbody>
+    <tr><td><strong>(a)</strong></td><td>under 100 sq ft, <em>or</em> width coefficient under 1.829 m (6 ft)</td><td>—</td><td>1 storey, max <strong>6 m</strong></td></tr>
+    <tr><td><strong>(b)</strong></td><td>under 600 sq ft</td><td>—</td><td><strong>10.5 m</strong> (34.449 ft)</td></tr>
+    <tr><td><strong>(c)</strong> <span class="amend">[2020/R-9]</span></td><td>600 – &lt; 1,000 sq ft</td><td>less than 1.828 m (6 ft)</td><td><strong>12.5 m</strong> (41.010 ft)</td></tr>
+    <tr><td><strong>(d)</strong> <span class="amend">[2020/R-9]</span></td><td>600 – &lt; 1,000 sq ft</td><td>at least 1.828 m (6 ft)</td><td><strong>18.5 m</strong> (60.696 ft)</td></tr>
+    <tr><td><strong>(e)</strong> <span class="amend">[2020/R-9]</span></td><td>1,000 sq ft or more</td><td>at least 4.572 m (15 ft)</td><td><strong>24.5 m</strong> (80.381 ft)</td></tr>
+    <tr><td><strong>(f)</strong> <span class="amend">[2020/R-9]</span></td><td>2,000 sq ft or more</td><td>at least 6.096 m (20 ft)</td><td><strong>30.48 m</strong> (100 ft)</td></tr>
+  </tbody></table>
+  <blockquote><strong>Interpretation note — apparent gap:</strong> Article 8 does not state a maximum height for a footprint of 1,000 sq ft or more where the width coefficient is at least 1.829 m and the access road or alley is less than 4.572 m (15 ft). The checker uses 18.5 m as a provisional fallback, but authority confirmation is required.</blockquote>`,
+    },
+    {
+      id: "9",
+      title: "Height — Residential Land in Cities",
+      body: `<p><em>Opening phrase replaced by <span class="amend">[2021/R-167]</span>.</em></p>
+  <p>For a building on a plot allocated for residential purposes on an island designated a city, the maximum height is determined as below, in a manner that does not conflict with Article 6-1.</p>
+  <p><strong>(a)</strong> Footprint under 100 sq ft, <em>or</em> width coefficient under 1.829 m (6 ft) → not more than 1 storey.</p>
+  <p><strong>(b)</strong> Footprint under 800 sq ft → the <strong>lowest</strong> of the heights given by the footprint, the width coefficient, and the access-road width.</p>
+  <p><strong>(c)</strong> Where the width coefficient &lt; 0.7 × √(building area), height is determined from the width coefficient (see <a href="#atbl1">Table 1</a>):<br><code>Max height = 1.2 + 0.3875 × (WC ÷ 0.7)²</code></p>
+  <p><strong>(d)</strong> Where the width coefficient ≥ 0.7 × √(building area), height is determined from the footprint (see <a href="#atbl2">Table 2</a>):<br><code>Max height = 1.2 + 0.3875 × footprint(m²)</code></p>
+  <p><strong>(e)</strong> Height is also determined by access-road width (see <a href="#atbl3">Table 3</a>):</p>
+  <ol>
+    <li>Under 1.219 m (4 ft) → 1 storey, max 6 m</li>
+    <li>1.219 m – 1.524 m → 9 m (29.53 ft)</li>
+    <li>Over 1.524 m – 1.829 m → 19.20 m (62.99 ft)</li>
+    <li>Over 1.829 m – 3.048 m → 25.20 m (82.68 ft)</li>
+    <li>Over 3.048 m → 30.48 m (100 ft)</li>
+  </ol>
+  <p><strong>(f)</strong> Footprint 800 sq ft or more → the lower of the heights given by access-road width and width coefficient.</p>
+  <p><strong>(g)</strong> In the case referred to in (c), the width coefficient applies as:</p>
+  <ol>
+    <li>Coefficient 3.0 or less → not exceeding <strong>16.5 m</strong> (54.13 ft).</li>
+    <li>Coefficient above 3.0 → not exceeding <strong>30.48 m</strong> (100 ft).</li>
+  </ol>
+  <p><strong>(h)</strong> The maximum height by access-road width shall be determined under (e).</p>
+  <div class="calc" id="calc9">
+    <div class="calc-head">Height calculator</div>
+    <div class="calc-grid">
+      <label>
+        <span class="lab-row">Footprint area <span class="unit-toggle" data-field="area"><button type="button" data-u="sqft" class="active">sq ft</button><button type="button" data-u="sqm">m²</button></span></span>
+        <input type="number" id="c-area" placeholder="e.g. 750" min="0" step="1">
+      </label>
+      <label>
+        <span class="lab-row">Width coefficient <span class="unit-toggle" data-field="wc"><button type="button" data-u="m" class="active">m</button><button type="button" data-u="ft">ft</button></span></span>
+        <input type="number" id="c-wc" placeholder="e.g. 4.5" min="0" step="0.001">
+        <label class="mini-check"><input type="checkbox" id="c-wc-auto"> auto-calculate</label>
+        <div class="sub-inputs" id="c-wc-sub" hidden>
+          <input type="number" id="c-wc-len" placeholder="longest length" min="0" step="0.001">
+          <span class="unit-toggle" data-field="wclen"><button type="button" data-u="m" class="active">m</button><button type="button" data-u="ft">ft</button></span>
+        </div>
+      </label>
+      <label>
+        <span class="lab-row">Access-road width <span class="unit-toggle" data-field="road"><button type="button" data-u="m" class="active">m</button><button type="button" data-u="ft">ft</button></span></span>
+        <input type="number" id="c-road" placeholder="e.g. 3.0" min="0" step="0.001">
+      </label>
+    </div>
+    <div class="calc-out" id="c-out">Enter values to see the maximum height.</div>
+    <div class="calc-note">Applies §9 caps. Width coefficient = Area (m²) ÷ Longest length (m) per §5.</div>
+  </div>`,
+    },
+    {
+      id: "10",
+      title: "Construction Above the Roof Beam / Terrace Slab / Deck",
+      body: `<p>After the maximum height is fixed under Articles 8 and 9, the following may be added (see Schedule 1):</p>
+  <ol type="a">
+    <li>Staircase and lift machine-room enclosure → not exceeding <strong>4 m</strong>. A greater height requires the lift manufacturer's specification.</li>
+    <li>Roof over that enclosure → up to <strong>1 m</strong> (3.280 ft).</li>
+    <li>Roof over the building → up to <strong>1.5 m</strong> (4.921 ft) above the roof beam.</li>
+    <li>Up to <strong>two-thirds</strong> of the terrace area may be built upon; its roof and drainage may project 0.457 m (1.499 ft) into the terrace.</li>
+    <li>Construction under (d) shall not exceed the lift machine-room height or 4 m.</li>
+    <li>Antennas and satellite dishes are not counted in building height. Near an international airport, they shall be installed under the relevant aviation regulations.</li>
+  </ol>`,
+    },
+    {
+      id: "11",
+      title: "Raising of the Ground Floor",
+      body: `<p><strong>(a)</strong> The ground floor may be raised up to <strong>600 mm</strong> above the highest level of the road or yard, and the same amount added to the overall permissible height.</p><p><strong>(b)</strong> Where raised to provide parking beneath, the allowance is <strong>1.5 m</strong>, likewise added to the overall permissible height.</p>`,
+    },
+    {
+      id: "12",
+      title: "Floor-to-Ceiling Height",
+      body: `<p><strong>(a)</strong> Residential floors → at least <strong>2.7 m</strong> (8.859 ft) to the underside of the slab or deck.</p><p><strong>(b)</strong> Non-residential floors → at least <strong>2.5 m</strong> (8.202 ft).</p>`,
+    },
+    {
+      id: "13",
+      title: "Road Width Used",
+      body: `<p><strong>(a)</strong> On a subdivided plot → the width of the main road on which the plot is located.</p><p><strong>(b)</strong> On a road accessible from one end only → the width of the main road.</p>`,
+    },
+    {
+      id: "14",
+      title: "Where Height Cannot Be Determined",
+      body: `<p>Where an irregular plot shape, an indeterminable maximum length, or any other reason prevents the height being fixed, a proposal shall be submitted to the Ministry for determination.</p>`,
+    },
+
+    { chapter: "Chapter Four", chapterTitle: "Vacant Space on Residential Land" },
+    {
+      id: "15",
+      title: "Allocation of Vacant Space",
+      body: `<p><em>Article 15 was replaced in full by <span class="amend">[2020/R-9]</span>.</em></p>
+  <p><strong>(a)</strong> Where the case is not particularly specified in paragraphs (b) to (d), a building on land allocated for residential purposes with a footprint of <strong>1,200 sq ft or more</strong> shall leave <strong>10%</strong> of the building footprint as unsheltered vacant space.</p>
+  <p><strong>(b)–(d)</strong> In the following cases, <strong>5%</strong> of the building footprint shall be left as unsheltered vacant space, and paragraph (a) does not apply in addition:</p>
+  <table><thead><tr><th></th><th>Location</th><th>Footprint</th><th>Height</th><th>Vacant space</th><th>Setback</th></tr></thead><tbody>
+    <tr><td><strong>(b)</strong></td><td>non-city islands</td><td>≥ 1,000 sq ft</td><td>18.5 – 24.5 m</td><td>5%, side facing road</td><td>≥ <strong>0.75 m</strong> from plot edge, any 2 sides</td></tr>
+    <tr><td><strong>(c)</strong></td><td>non-city islands</td><td>≥ 2,000 sq ft</td><td>24.5 – 30.48 m</td><td>5%, side facing road</td><td>≥ <strong>0.90 m</strong> from plot edge, any 2 sides</td></tr>
+    <tr><td><strong>(d)</strong></td><td>cities</td><td>600 – ≤ 1,200 sq ft</td><td>18.5 – 30.48 m</td><td>5%, anywhere within footprint</td><td>none prescribed</td></tr>
+  </tbody></table>
+  <p><strong>(b) continued</strong> — Balconies may project into the setback under (b) from <strong>6 m</strong> above ground or pavement level and above, up to <strong>50%</strong> of the length of the side of the building containing the setback.</p>
+  <p><strong>(e)</strong> Wherever 5% of the building footprint is to be left as unsheltered vacant space, that open void shall be at least <strong>0.75 m</strong> deep.</p>
+  <p><strong>(f)</strong> Unsheltered air vents for building ventilation may be counted towards the 5% vacant space, provided each is at least <strong>0.9 m × 0.9 m</strong>.</p>
+  <p><strong>(g)</strong> No part of the building shall extend into the vacant space, except:</p>
+  <ol>
+    <li>the roof drain, which may extend <strong>0.2 m</strong> from the building wall;</li>
+    <li>doors and window shutters, which may be opened to ventilate and light the building.</li>
+  </ol>
+  <p><strong>(h)</strong> The vacant space may be used for parking under Article 20(a). Where the 5% is at the front of the building (paragraphs b and c), only <strong>50%</strong> of that vacant space may be used for parking.</p>`,
+    },
+    {
+      id: "15-1",
+      title: "Rounding of a Corner Plot Abutting Two Roads",
+      body: `<p><em>Added by <span class="amend">[2020/R-9]</span>.</em></p>
+  <p>A building on a corner plot abutting two roads shall be designed with the corner rounded to a radius of <strong>12 ft</strong>, measured from the part of the plot adjacent to the road boundary.</p>
+  <p><em>For reference only: 12 ft = 3.6576 m.</em></p>`,
+    },
+
+    { chapter: "Chapter Five", chapterTitle: "Building Projections on Residential Land" },
+    {
+      id: "16",
+      title: "Projections Beyond the Boundary",
+      body: `<p>No part of a building may project beyond the plot boundary, except:</p>
+  <ol type="a">
+    <li>Road under 6 ft wide → the roof may project <strong>0.2 m (0.656 ft)</strong>, at more than 2.743 m (9 ft) above the road.</li>
+    <li>Road 6 ft or wider → the roof and drainage may project <strong>0.457 m (1.499 ft)</strong>, at more than 2.743 m (9 ft) above the road.</li>
+  </ol>`,
+    },
+    {
+      id: "17",
+      title: "Doors, Windows and Fanlights Opening Toward the Road",
+      body: `<p><strong>(a)</strong> None shall open beyond the boundary below 2.743 m (9 ft) above pavement level.</p><p><strong>(b)</strong> Above 2.743 m (9 ft), they shall project no more than <strong>0.457 m (1.499 ft)</strong>.</p>`,
+    },
+
+    { chapter: "Chapter Six", chapterTitle: "Ventilation and Lighting on Residential Land" },
+    {
+      id: "18",
+      title: "Ventilation and Light to Parts of the Building",
+      body: `<p><em>Applies until the relevant Building Code compliance document is published and in force.</em></p>
+  <ol type="a">
+    <li>Each part of the building shall have openings facing unbuilt vacant space totalling not less than <strong>10%</strong> of that part's floor area.</li>
+    <li>An opening is deemed to ventilate <strong>6 m</strong> from the opening. Where the opening is not less than 15% of the floor area, it is deemed to ventilate <strong>7.5 m</strong>.</li>
+    <li>Unbuilt vacant space shall be at least <strong>600 × 600 mm</strong> clear. Where it adjoins another plot, it shall be at least <strong>750 mm</strong> from the boundary.</li>
+    <li>No opening of any kind — including fixed glass — shall be placed in a wall built on the boundary of another plot. Any opening facing an adjoining plot shall be set back at least 750 mm.</li>
+    <li>The adjoining road or alley may be used in place of vacant space. Where a plot is subdivided, no opening may be placed so as to give entry into a plot other than the one from which the yard was taken.</li>
+    <li>Notwithstanding (e), an alley created by subdivision that becomes a government alley is treated as any other adjoining road.</li>
+    <li>The lowest 2 floors (combined height not exceeding 7.5 m), if non-residential and adequately mechanically ventilated, need not have the openings and vacant space in (a), (b) and (c). The remainder of the building shall comply, and the vacant space shall be open from its base to the top. If those floors are used for residential purposes at any time, (a), (b) and (c) apply to them.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Seven", chapterTitle: "Railings and Windows on Residential Land" },
+    {
+      id: "19",
+      title: "Standards for Balconies, Stairs, Terraces and Windows",
+      body: `<p><em>Applies until the Building Code compliance documents come into force.</em></p>
+  <ol type="a">
+    <li>Railings or walls on balconies and terraces → at least <strong>1.2 m</strong> (3.94 ft) high, with no gap admitting a <strong>125 mm</strong> sphere, and not climbable by children.</li>
+    <li>Where any part of a building adjoins the boundary of another plot → a wall or barrier of at least <strong>2 m</strong> (6.562 ft) shall be constructed.</li>
+    <li>Railings or walls shall also be installed on balconies and terraces not covered by (b).</li>
+    <li>Staircases → railings or walls at least <strong>850 mm</strong> high. In service areas children would not normally enter, they shall be safe but need not be childproof.</li>
+    <li>Windows more than 2.743 m (9 ft) above ground → sill at least <strong>1 m</strong> (3.281 ft) above floor level.</li>
+    <li>Notwithstanding (e), windows opening onto terraces and balconies may be lower than 1 m above floor level.</li>
+    <li>A vent in a common area more than 2.743 m (9 ft) above ground, if it admits a 125 mm sphere, shall be at least 1 m above floor level.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Eight", chapterTitle: "Parking on Residential Land" },
+    {
+      id: "20",
+      title: "Determination of Parking",
+      body: `<ol type="a">
+    <li>Footprint over 1,200 sq ft <strong>AND</strong> more than 5 storeys → <strong>10%</strong> of the footprint allocated to parking.</li>
+    <li>Parking need not be on the lowest floor, but easy vehicle access shall be planned.</li>
+    <li>The parking area may be divided, but no part may be less than 5% of the footprint. The access road or ramp is not counted within the 10%.</li>
+    <li>No parking is required for plots on roads where vehicle access is prohibited.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Nine", chapterTitle: "Miscellaneous" },
+    {
+      id: "21",
+      title: "Waste Storage Space",
+      body: `<p><strong>(a)</strong> Footprint 1,000 sq ft or more → at least <strong>1.5%</strong> of the footprint as waste storage space.</p><p><strong>(b)</strong> Not less than <strong>2 × 2 ft</strong>.</p>`,
+    },
+    {
+      id: "22",
+      title: "Subdivision of Land",
+      body: `<p>Where a residential plot is subdivided to include an alley, that alley shall be at least <strong>4 ft</strong> wide.</p>`,
+    },
+    {
+      id: "23",
+      title: "Space Adjacent to Boundaries",
+      body: `<p>Where a building or part of a building is built against a boundary other than a road boundary, a vacant space at least <strong>750 mm</strong> wide shall be left. It need not be provided on all sides where part of the building sits on the boundary, but every such space shall remain accessible for cleaning.</p>`,
+    },
+    {
+      id: "24",
+      title: "Non-Residential Uses on Residential Land",
+      body: `<p>Within <strong>60 days</strong> of publication, the Ministry shall publish a permit application procedure for sai-hotels, restaurants, cafés, bakeries, shops, carpentry and other workshops, warehouses and other economic establishments on residential land.</p>`,
+    },
+    {
+      id: "25",
+      title: "Planning Committee",
+      body: `<ol type="a">
+    <li>The Minister shall appoint a <strong>Planning Committee</strong> to decide matters within the purpose of this regulation, or within its jurisdiction under the Construction Act, that are not expressly provided for.</li>
+    <li>The Committee shall determine its own procedures.</li>
+    <li>It operates under the Ministry that sets the planning standards.</li>
+    <li>Policy decisions on matters before it are taken on the direction of the Minister.</li>
+    <li>Its decisions are binding.</li>
+  </ol>`,
+    },
+
+    { chapter: "Chapter Ten", chapterTitle: "Action for Violations" },
+    {
+      id: "26",
+      title: "Procedure for Violations",
+      body: `<ol type="a">
+    <li>Omitting anything required by this regulation is prohibited. Any person noticing a violation shall notify the building-permit issuing authority.</li>
+    <li>Where that authority takes no action within <strong>30 days</strong> of notification, the matter shall be referred to the Ministry.</li>
+    <li>On receiving information under (a), or on finding a violation itself, the authority shall inspect the premises for compliance.</li>
+    <li>Where an inspection under (c) finds non-compliance, or the authority finds the premises may be hazardous:
+      <ol>
+        <li>a period under Article 27 shall be given and rectification ordered within it;</li>
+        <li>the notice shall state the reason and the period, and shall be dated, signed and stamped;</li>
+        <li>the authority shall monitor the premises until rectification is complete.</li>
+      </ol>
+    </li>
+  </ol>`,
+    },
+    {
+      id: "27",
+      title: "Action Against Violators",
+      body: `<p>Each violation is dealt with separately:</p>
+  <ol type="a">
+    <li><span class="amend">[2020/R-9]</span> A period for rectification shall be given according to the gravity of the matter and, upon notice, a fine <strong>not exceeding MVR 100,000</strong> shall be imposed separately for each violation.</li>
+    <li><strong>3%</strong> of the fine added for each additional day the matter remains unrectified after that period.</li>
+    <li>Where the fine is unpaid and the matter unrectified, referral to the Attorney General's Office for recovery of the fine and an order to rectify.</li>
+  </ol>`,
+    },
+
+    { chapter: "Tables & Schedule", chapterTitle: "Reference tables and drawings" },
+    {
+      id: "tbl1",
+      title: "Table 1 — City residential: height by width coefficient",
+      body: `<p><em>Applies where the width coefficient &lt; 0.7 × √(building area). These are prescribed maxima and govern where they differ from the §9(c) formula.</em></p>
+  <table><thead><tr><th>Width coefficient (m)</th><th>Maximum height (m)</th></tr></thead><tbody>
+    <tr><td>2.438</td><td>5.90</td></tr>
+    <tr><td>3.448</td><td>10.60</td></tr>
+    <tr><td>5.452</td><td>24.71</td></tr>
+    <tr><td>6.451</td><td>26.40</td></tr>
+    <tr><td>6.954</td><td>30.48</td></tr>
+  </tbody></table>`,
+    },
+    {
+      id: "tbl2",
+      title: "Table 2 — City residential: height by footprint",
+      body: `<p><em>Applies where the width coefficient ≥ 0.7 × √(building area).</em></p>
+  <table><thead><tr><th>Footprint (m²)</th><th>Maximum height (m)</th></tr></thead><tbody>
+    <tr><td>9.290</td><td>4.8</td></tr>
+    <tr><td>18.581</td><td>8.4</td></tr>
+    <tr><td>46.452</td><td>19.20</td></tr>
+    <tr><td>65.032</td><td>26.40</td></tr>
+    <tr><td>75.561</td><td>30.48</td></tr>
+  </tbody></table>`,
+    },
+    {
+      id: "tbl3",
+      title: "Table 3 — City residential: height by access-road width",
+      body: `<table><thead><tr><th>Access-road width</th><th>Maximum height</th></tr></thead><tbody>
+    <tr><td>Under 1.219 m</td><td>1 storey, max 6 m</td></tr>
+    <tr><td>1.219 m – 1.524 m</td><td>9 m</td></tr>
+    <tr><td>Over 1.524 m – 1.829 m</td><td>20 m</td></tr>
+    <tr><td>Over 1.829 m – 3.048 m</td><td>25.20 m</td></tr>
+    <tr><td>Over 3.048 m</td><td>Up to 30.48 m</td></tr>
+  </tbody></table>
+  <p><em>Note: §9(e)(3) says 19.20 m for the 1.524–1.829 m band; this table says 20 m. Both are reproduced as they stand in the source.</em></p>`,
+    },
+    {
+      id: "sch1",
+      title: "Schedule 1 — Drawings",
+      body: `<ul>
+    <li><strong>Drawing 1</strong> — Raising of the staircase and lift machine-room enclosure, and the roof projection. Elements: max building height · terrace railing/wall height · permissible construction height · top level of ground/yard.</li>
+    <li><strong>Drawing 2</strong> — Raising and roofing of the staircase and lift machine-room enclosure. Same elements.</li>
+    <li><strong>Drawing 3</strong> — Roofing at the top of the building. Elements: max building height · permissible construction height · top level of ground/yard.</li>
+  </ul>
+  <p><em>Original diagrams accompany the source PDF.</em></p>`,
+    },
+  ];
+
+  const toc = document.getElementById("toc");
+  const content = document.getElementById("content");
+  const q = document.getElementById("q");
+  const meta = document.getElementById("meta");
+
+  let currentChapter = null;
+  DATA.forEach((item) => {
+    if (item.chapter && !item.id) {
+      const h = document.createElement("div");
+      h.className = "toc-chapter";
+      h.textContent = item.chapter;
+      h.dataset.chapter = item.chapter;
+      toc.appendChild(h);
+
+      const sec = document.createElement("section");
+      sec.className = "article chapter-head";
+      sec.innerHTML = `<h2>${item.chapter}</h2><p>${item.chapterTitle}</p>`;
+      content.appendChild(sec);
+      currentChapter = item.chapter;
+      return;
+    }
+    if (item.sourceNote) {
+      const sec = document.createElement("div");
+      sec.className = "source-note";
+      sec.innerHTML = `<details class="doc-note"><summary>Note from the source</summary><div>${item.sourceNote}</div></details>`;
+      content.appendChild(sec);
+      return;
+    }
+    if (item.chapter && item.id) {
+      const h = document.createElement("div");
+      h.className = "toc-chapter";
+      h.textContent = item.chapter;
+      h.dataset.chapter = item.chapter;
+      toc.appendChild(h);
+
+      const sec = document.createElement("section");
+      sec.className = "article chapter-head";
+      sec.id = item.id;
+      sec.innerHTML = `<h2>${item.chapter}</h2><p>${item.chapterTitle}</p>`;
+      content.appendChild(sec);
+      currentChapter = item.chapter;
+      return;
+    }
+    // article
+    const a = document.createElement("a");
+    a.href = `#a${item.id}`;
+    a.innerHTML = `<span class="num">${item.id}</span><span>${item.title}</span>`;
+    a.dataset.chapter = currentChapter;
+    a.dataset.id = item.id;
+    toc.appendChild(a);
+
+    const sec = document.createElement("section");
+    sec.className = "article";
+    sec.id = `a${item.id}`;
+    sec.dataset.id = item.id;
+    sec.dataset.title = item.title;
+    const numLabel = /^\d+$/.test(item.id)
+      ? `Art. ${item.id}`
+      : item.id.toUpperCase();
+    sec.innerHTML = `<div class="art-head"><div class="art-num">${numLabel}</div><div class="art-title">${item.title}</div></div><div class="art-body">${item.body}</div>`;
+    // Collapse blockquotes and inline "Note:" paragraphs into details/summary
+    sec.querySelectorAll("blockquote").forEach((bq) => {
+      const d = document.createElement("details");
+      d.className = "doc-note";
+      const s = document.createElement("summary");
+      s.textContent = "Note from the source";
+      d.appendChild(s);
+      const inner = document.createElement("div");
+      inner.innerHTML = bq.innerHTML;
+      d.appendChild(inner);
+      bq.replaceWith(d);
+    });
+    sec.querySelectorAll("p > em").forEach((em) => {
+      const p = em.parentElement;
+      if (p.children.length !== 1 || !p.textContent.trim().toLowerCase().startsWith("note") && !p.textContent.trim().toLowerCase().startsWith("applies") && !p.textContent.trim().toLowerCase().startsWith("added") && !p.textContent.trim().toLowerCase().startsWith("opening") && !p.textContent.trim().toLowerCase().startsWith("article 15 was") && !p.textContent.trim().toLowerCase().startsWith("for reference")) return;
+      const d = document.createElement("details");
+      d.className = "doc-note";
+      const s = document.createElement("summary");
+      s.textContent = "Note from the source";
+      d.appendChild(s);
+      const inner = document.createElement("div");
+      inner.innerHTML = p.innerHTML;
+      d.appendChild(inner);
+      p.replaceWith(d);
+    });
+    content.appendChild(sec);
+  });
+
+  // Highlight + filter
+  function esc(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  function stripMarks(node) {
+    node.querySelectorAll("mark").forEach((m) => {
+      const t = document.createTextNode(m.textContent);
+      m.replaceWith(t);
+    });
+    node.normalize();
+  }
+  function highlightIn(node, rx) {
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null);
+    const targets = [];
+    let n;
+    while ((n = walker.nextNode())) {
+      if (
+        n.parentNode.nodeName === "SCRIPT" ||
+        n.parentNode.nodeName === "STYLE"
+      )
+        continue;
+      if (rx.test(n.nodeValue)) targets.push(n);
+    }
+    targets.forEach((t) => {
+      const frag = document.createDocumentFragment();
+      const parts = t.nodeValue.split(rx);
+      const matches = t.nodeValue.match(rx);
+      parts.forEach((p, i) => {
+        frag.appendChild(document.createTextNode(p));
+        if (matches && i < matches.length) {
+          const m = document.createElement("mark");
+          m.textContent = matches[i];
+          frag.appendChild(m);
+        }
+      });
+      t.replaceWith(frag);
+    });
+  }
+
+  function runSearch(term) {
+    const sections = content.querySelectorAll("section.article");
+    const links = toc.querySelectorAll("a");
+    const chapters = toc.querySelectorAll(".toc-chapter");
+
+    sections.forEach(stripMarks);
+
+    if (!term) {
+      sections.forEach((s) => s.classList.remove("hidden"));
+      links.forEach((l) => l.classList.remove("hidden"));
+      chapters.forEach((c) => c.classList.remove("hidden"));
+      meta.textContent = "";
+      return;
+    }
+
+    const rx = new RegExp(esc(term), "gi");
+    let hits = 0;
+    const visibleChapters = new Set();
+
+    sections.forEach((s) => {
+      if (s.classList.contains("chapter-head")) {
+        s.classList.add("hidden");
+        return;
+      }
+      const text = s.textContent;
+      if (rx.test(text)) {
+        s.classList.remove("hidden");
+        highlightIn(s, new RegExp(esc(term), "gi"));
+        hits++;
+      } else {
+        s.classList.add("hidden");
+      }
+    });
+
+    links.forEach((l) => {
+      const id = l.dataset.id;
+      const sec = document.getElementById("a" + id);
+      if (sec && !sec.classList.contains("hidden")) {
+        l.classList.remove("hidden");
+        visibleChapters.add(l.dataset.chapter);
+      } else {
+        l.classList.add("hidden");
+      }
+    });
+
+    chapters.forEach((c) => {
+      if (visibleChapters.has(c.dataset.chapter)) c.classList.remove("hidden");
+      else c.classList.add("hidden");
+    });
+
+    meta.textContent =
+      hits === 0
+        ? "No matches"
+        : `${hits} article${hits === 1 ? "" : "s"} match`;
+  }
+
+  let searchTimer;
+  q.addEventListener("input", (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => runSearch(e.target.value.trim()), 120);
+  });
+  q.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      q.value = "";
+      runSearch("");
+    }
+  });
+
+  // Keyboard shortcut: /
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== q) {
+      e.preventDefault();
+      q.focus();
+    }
+  });
+
+  // Scroll spy
+  const spyObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          const id = en.target.dataset.id;
+          toc
+            .querySelectorAll("a")
+            .forEach((a) => a.classList.toggle("active", a.dataset.id === id));
+        }
+      });
+    },
+    { rootMargin: "-40% 0px -55% 0px" },
+  );
+  content
+    .querySelectorAll("section.article[data-id]")
+    .forEach((s) => spyObserver.observe(s));
+
+  // Theme picker — name (classic|modern) and mode (light|system|dark)
+  const root = document.documentElement;
+  function applyTheme() {
+    const name = localStorage.getItem("themeName") || "modern";
+    const mode = localStorage.getItem("themeMode") || "system";
+    root.setAttribute("data-theme-name", name === "classic" ? "classic" : "modern");
+    if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode);
+    else root.removeAttribute("data-theme");
+    document.querySelectorAll("#theme-name-picker button").forEach((b) => b.classList.toggle("on", b.dataset.name === name));
+    document.querySelectorAll("#theme-mode-picker button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
+  }
+  document.querySelectorAll("#theme-name-picker button").forEach((b) => {
+    b.addEventListener("click", () => { try { localStorage.setItem("themeName", b.dataset.name); } catch(e) {} applyTheme(); });
+  });
+  document.querySelectorAll("#theme-mode-picker button").forEach((b) => {
+    b.addEventListener("click", () => { try { localStorage.setItem("themeMode", b.dataset.mode); } catch(e) {} applyTheme(); });
+  });
+  applyTheme();
+
+  // Article 9 height calculator
+  const SQFT_TO_SQM = 0.092903;
+  const FT_TO_M = 0.3048;
+  const units = { area: "sqft", wc: "m", road: "m", wclen: "m" };
+  document.querySelectorAll(".unit-toggle").forEach((tg) => {
+    tg.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      tg.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      units[tg.dataset.field] = btn.dataset.u;
+      calc9();
+    });
+  });
+  const wcAuto = document.getElementById("c-wc-auto");
+  const wcInput = document.getElementById("c-wc");
+  const wcSub = document.getElementById("c-wc-sub");
+  const wcLen = document.getElementById("c-wc-len");
+  wcAuto.addEventListener("change", () => {
+    wcSub.hidden = !wcAuto.checked;
+    wcInput.readOnly = wcAuto.checked;
+    wcInput.style.opacity = wcAuto.checked ? 0.6 : 1;
+    calc9();
+  });
+  wcLen.addEventListener("input", calc9);
+
+  const roadCap = (r) => {
+    if (!(r > 0)) return null;
+    if (r < 1.219) return { h: 6, why: "road < 1.219 m → 1 storey / 6 m" };
+    if (r < 1.524) return { h: 9, why: "road 1.219–1.524 m → ≤ 9 m" };
+    if (r < 1.829) return { h: 19.2, why: "road 1.524–1.829 m → ≤ 19.20 m" };
+    if (r < 3.048) return { h: 25.2, why: "road 1.829–3.048 m → ≤ 25.20 m" };
+    return { h: 30.48, why: "road ≥ 3.048 m → ≤ 30.48 m" };
+  };
+  function calc9() {
+    // Read inputs, normalise to canonical: area→sq ft, wc→m, road→m
+    let area = parseFloat(document.getElementById("c-area").value);
+    let wc = parseFloat(document.getElementById("c-wc").value);
+    let road = parseFloat(document.getElementById("c-road").value);
+    if (units.area === "sqm" && area > 0) area = area / SQFT_TO_SQM;
+    if (units.wc === "ft" && wc > 0) wc = wc * FT_TO_M;
+    if (units.road === "ft" && road > 0) road = road * FT_TO_M;
+    // Auto-calc WC from area (m²) / longest length (m)
+    if (wcAuto.checked && area > 0) {
+      let len = parseFloat(wcLen.value);
+      if (units.wclen === "ft" && len > 0) len = len * FT_TO_M;
+      if (len > 0) {
+        wc = (area * SQFT_TO_SQM) / len;
+        wcInput.value = (units.wc === "ft" ? wc / FT_TO_M : wc).toFixed(3);
+      } else {
+        wc = NaN;
+        wcInput.value = "";
+      }
+    }
+    const out = document.getElementById("c-out");
+    if (!(area > 0) && !(wc > 0) && !(road > 0)) {
+      out.textContent = "Enter values to see the maximum height.";
+      return;
+    }
+    const caps = [];
+    // §9(a): 1 storey if area<100 sqft or wc<1.829
+    if (area > 0 && area < 100) caps.push({ h: 6, why: "footprint < 100 sq ft → 1 storey / 6 m (§9a)" });
+    if (wc > 0 && wc < 1.829) caps.push({ h: 6, why: "width coefficient < 1.829 m → 1 storey / 6 m (§9a)" });
+    // Formulas §9(c)/(d)
+    if (area > 0 && wc > 0) {
+      const areaSqm = area * SQFT_TO_SQM;
+      const sqrtArea = Math.sqrt(areaSqm);
+      if (wc < 0.7 * sqrtArea) {
+        const h = 1.2 + 0.3875 * Math.pow(wc / 0.7, 2);
+        caps.push({ h, why: `width-coefficient formula (§9c): 1.2 + 0.3875 × (${wc} / 0.7)² = ${h.toFixed(2)} m` });
+      } else {
+        const h = 1.2 + 0.3875 * areaSqm;
+        caps.push({ h, why: `footprint formula (§9d): 1.2 + 0.3875 × ${areaSqm.toFixed(2)} m² = ${h.toFixed(2)} m` });
+      }
+      // §9(g): wc cap
+      if (wc < 3.0) caps.push({ h: 16.5, why: "width coefficient < 3.0 → ≤ 16.5 m (§9g)" });
+      else caps.push({ h: 30.48, why: "width coefficient ≥ 3.0 → ≤ 30.48 m (§9g)" });
+    }
+    const rc = roadCap(road);
+    if (rc) caps.push({ h: rc.h, why: rc.why + " (§9e / Table 3)" });
+
+    if (!caps.length) {
+      out.textContent = "Need footprint + width coefficient, or access-road width.";
+      return;
+    }
+    const winner = caps.reduce((a, b) => (b.h < a.h ? b : a));
+    const detail = caps.map((c) => `<li>${c.why}${c === winner ? " ← <strong>binding</strong>" : ""}</li>`).join("");
+    out.innerHTML = `Maximum buildable height: <span class="big">${winner.h.toFixed(2)} m</span> <span style="color:var(--muted);font-size:13px;">(${(winner.h * 3.28084).toFixed(2)} ft)</span><ul>${detail}</ul>`;
+  }
+  ["c-area", "c-wc", "c-road"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", calc9);
+  });
+
+</script>

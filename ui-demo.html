@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en" data-mode="light" data-theme-name="minimalist">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Navigator UI Demo</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent:#0052ff; --accent-2:#4d7cff; --accent-hover:#1a63ff; --accent-soft:rgba(0,82,255,.05);
+      --bg:#fafafa; --bg-deep:#f4f6f9; --panel:#fff; --surface:#f1f5f9;
+      --surface-hover:#e9eef5; --ink:#0f172a; --muted:#64748b;
+      --line:#e2e8f0; --line-strong:#cbd5e1; --good:#168653; --bad:#dc3f58; --nav:rgba(250,250,250,.88);
+      --shadow:0 1px 3px rgba(15,23,42,.05),0 10px 28px rgba(15,23,42,.055);
+      color-scheme:light;
+    }
+    :root[data-mode="dark"] {
+      --bg:#0b1020; --bg-deep:#070b14; --panel:#111827; --surface:#182235;
+      --surface-hover:#202c42; --ink:#f8fafc; --muted:#94a3b8; --line:#243149;
+      --line-strong:#34435d; --good:#4ade80; --bad:#fb7185; --nav:rgba(11,16,32,.88);
+      --accent-soft:rgba(0,82,255,.12); --shadow:0 1px 2px rgba(0,0,0,.22),0 16px 36px rgba(0,0,0,.2);
+      color-scheme:dark;
+    }
+    :root[data-theme-name="classic"] { --panel:#11100f; --surface:rgba(255,248,232,.055); --surface-hover:rgba(255,248,232,.085); }
+    :root[data-theme-name="classic"][data-mode="light"] { --bg:#f4f1e9; --bg-deep:#ebe5d8; --panel:#fbf9f2; --surface:rgba(255,255,255,.66); --surface-hover:#fffdf8; }
+    :root[data-theme-name="classic"] .article h3 { font-family:Georgia,serif; letter-spacing:-.025em; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-height:100vh; overflow-x:hidden; background:
+      radial-gradient(800px 500px at 82% -8%, rgba(0,82,255,.055), transparent 68%),
+      linear-gradient(180deg,var(--bg),var(--bg-deep)); color:var(--ink);
+      font:14px/1.55 Inter,system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.22; background-image:radial-gradient(circle,var(--muted) .7px,transparent .8px); background-size:28px 28px; mask-image:linear-gradient(to bottom,black,transparent 48%); }
+    button,input,select { font:inherit; }
+    button,a,select { -webkit-tap-highlight-color:transparent; }
+    :focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+    .nav { position:sticky; top:0; z-index:20; min-height:62px; display:flex; align-items:center; gap:26px;
+      padding:10px 28px; border-bottom:1px solid var(--line); background:var(--nav); backdrop-filter:blur(18px) saturate(150%); }
+    .brand { display:flex; align-items:center; gap:10px; min-width:max-content; font-weight:650; letter-spacing:-.02em; }
+    .mark { width:26px; height:26px; border-radius:8px; display:grid; place-items:center; background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 5px 16px rgba(0,82,255,.22); color:#fff; font-size:12px; }
+    .links { display:flex; gap:22px; align-items:center; }
+    .links a { color:var(--muted); text-decoration:none; font-size:13px; transition:color .2s ease; }
+    .links a:hover,.links a.active { color:var(--ink); }
+    .links a.active::after { content:""; display:block; height:2px; margin-top:7px; border-radius:2px; background:var(--accent); }
+    .nav-controls { margin-left:auto; display:flex; align-items:center; gap:8px; }
+    .control { height:36px; display:flex; align-items:center; gap:7px; padding:0 10px; color:var(--muted);
+      background:var(--panel); border:1px solid var(--line); border-radius:10px; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .control label { font:500 12px/1 JetBrains Mono,monospace; letter-spacing:.05em; text-transform:uppercase; }
+    .control select { color:var(--ink); background:transparent; border:0; outline:0; font-size:13px; font-weight:600; }
+    .modes { padding:3px; gap:2px; }
+    .modes button { width:27px; height:26px; padding:0; border:0; border-radius:6px; color:var(--muted); background:transparent; cursor:pointer; }
+    .modes button.active { color:#fff; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 3px 12px rgba(0,82,255,.2); }
+    main { position:relative; width:min(1120px,calc(100% - 40px)); margin:0 auto; padding:64px 0 110px; }
+    .eyebrow { width:max-content; display:flex; align-items:center; gap:9px; padding:7px 12px; color:var(--accent); border:1px solid rgba(0,82,255,.18); border-radius:99px; background:var(--accent-soft); font:500 12px/1 JetBrains Mono,monospace; letter-spacing:.09em; text-transform:uppercase; }
+    .eyebrow::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+    .hero { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:32px; align-items:end; margin-bottom:36px; }
+    h1 { max-width:800px; margin:16px 0 14px; font:650 clamp(38px,5vw,62px)/1.04 Inter,system-ui,sans-serif; letter-spacing:-.045em; }
+    .lede { max-width:680px; margin:0; color:var(--muted); font-size:15px; }
+    .json-actions { display:flex; gap:8px; white-space:nowrap; }
+    .btn { min-height:40px; border:1px solid var(--line); border-radius:11px; padding:0 15px; color:var(--ink);
+      background:var(--panel); cursor:pointer; font-weight:600; font-size:12px; box-shadow:0 1px 2px rgba(15,23,42,.04); transition:.22s cubic-bezier(.16,1,.3,1); }
+    .btn:hover { transform:translateY(-1px); background:var(--surface-hover); border-color:var(--line-strong); }
+    .btn:active { transform:scale(.98); }
+    .btn.primary { border-color:transparent; background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff;
+      box-shadow:0 6px 18px rgba(0,82,255,.2); }
+    .workspace { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr); gap:18px; }
+    .card { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--panel); box-shadow:var(--shadow); }
+    .card::before { content:""; position:absolute; inset:0 0 auto; height:1px; background:linear-gradient(90deg,transparent,rgba(0,82,255,.18),transparent); opacity:.42; }
+    .card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:20px 22px; border-bottom:1px solid var(--line); }
+    h2 { font-family:Inter,system-ui,sans-serif; font-weight:650; }
+        .card h2 { margin:0 0 3px; font-size:16px; letter-spacing:-.02em; }
+    .sub { color:var(--muted); font-size:13px; }
+    .status { display:flex; align-items:center; gap:7px; padding:5px 9px; border:1px solid rgba(74,222,128,.22); border-radius:99px; color:var(--good); background:rgba(74,222,128,.07); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+    .status::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 10px currentColor; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; padding:22px; }
+    .field { display:grid; gap:7px; }
+    .field label { color:var(--muted); font-size:13px; font-weight:600; }
+    .input-shell { display:flex; align-items:center; min-height:44px; border:1px solid var(--line); border-radius:10px; background:var(--bg); transition:.2s ease; }
+    .input-shell:focus-within { border-color:rgba(0,82,255,.72); box-shadow:0 0 0 3px rgba(0,82,255,.12),0 0 22px rgba(0,82,255,.08); }
+    .input-shell input,.input-shell select { min-width:0; width:100%; padding:0 12px; border:0; outline:0; color:var(--ink); background:transparent; }
+    .unit { padding:0 11px; border-left:1px solid var(--line); color:var(--muted); font-size:12px; }
+    .result { margin:0 22px 22px; padding:18px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+    .result-label { color:var(--muted); font:500 12px/1.2 JetBrains Mono,monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .height { margin:5px 0 13px; font-size:30px; font-weight:700; letter-spacing:-.045em; }
+    .height small { color:var(--muted); font-size:12px; font-weight:500; letter-spacing:0; }
+    .basis { display:grid; gap:8px; padding-top:13px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    .basis div { display:flex; justify-content:space-between; gap:14px; }
+    .basis .binding { color:var(--ink); font-weight:600; }
+    .tag { padding:3px 7px; border-radius:5px; color:var(--accent-2); background:rgba(0,82,255,.1); font:500 12px/1.2 JetBrains Mono,monospace; letter-spacing:.05em; text-transform:uppercase; }
+    .checklist { padding:7px; }
+    .clause { display:grid; grid-template-columns:34px 1fr auto; gap:11px; align-items:center; min-height:58px; padding:8px 10px; border:1px solid transparent; border-radius:10px; cursor:pointer; transition:.2s ease; }
+    .clause:hover { border-color:var(--line); background:var(--surface); }
+    .clause.checked,.clause.checked:hover { border-color:rgba(74,222,128,.3); background:rgba(74,222,128,.09); }
+    .clause.failed,.clause.failed:hover { border-color:rgba(251,113,133,.32); background:rgba(251,113,133,.09); }
+    .state { width:28px; height:28px; display:grid; place-items:center; border:1px solid var(--line-strong); border-radius:8px; color:var(--muted); font-weight:700; }
+    .clause.checked .state { color:#fff; border-color:var(--good); background:var(--good); box-shadow:0 4px 18px rgba(74,222,128,.2); }
+    .clause.failed .state { color:#fff; border-color:var(--bad); background:var(--bad); box-shadow:0 4px 18px rgba(251,113,133,.18); }
+    .clause-text { font-size:12px; line-height:1.45; }
+    .ref { color:var(--accent); font:500 12px/1 JetBrains Mono,monospace; }
+    .foot { display:flex; align-items:center; justify-content:space-between; padding:15px 17px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+    .progress { width:88px; height:4px; overflow:hidden; border-radius:4px; background:var(--line-strong); }
+    .progress span { display:block; width:68%; height:100%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+    .inventory { margin-top:56px; }
+    .inventory-head { display:flex; justify-content:space-between; gap:20px; align-items:end; margin-bottom:18px; }
+    .inventory h2 { margin:7px 0 0; font-size:28px; letter-spacing:-.045em; }
+    .inventory-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
+    .sample { grid-column:span 6; padding:20px; }
+    .sample.wide { grid-column:1/-1; }
+    .sample.third { grid-column:span 4; }
+    .sample-title { margin-bottom:15px; color:var(--muted); font:500 12px/1.2 JetBrains Mono,monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .stack { display:grid; gap:10px; }
+    .button-row,.chip-row,.choice-row,.unit-toggle { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .btn.danger { color:var(--bad); border-color:rgba(251,113,133,.3); }
+    .btn:disabled { opacity:.42; cursor:not-allowed; transform:none; }
+    .chip { padding:5px 9px; border:1px solid var(--line); border-radius:99px; color:var(--muted); background:var(--surface); font-size:12px; font-weight:650; }
+    .chip.active { color:#fff; border-color:var(--accent); background:var(--accent); }
+    .choice { display:flex; align-items:center; gap:7px; color:var(--muted); font-size:12px; }
+    .choice input { accent-color:var(--accent); }
+    .unit-toggle { width:max-content; gap:2px; padding:3px; border:1px solid var(--line); border-radius:8px; background:rgba(0,0,0,.12); }
+    .unit-toggle button { border:0; border-radius:5px; padding:6px 10px; color:var(--muted); background:transparent; font-size:12px; cursor:pointer; }
+    .unit-toggle button.active { color:#fff; background:var(--accent); }
+    .notice { padding:12px 13px; border:1px solid var(--line); border-left:3px solid var(--muted); border-radius:9px; background:var(--surface); color:var(--muted); font-size:12px; }
+    .notice strong { display:block; margin-bottom:2px; color:var(--ink); }
+    .notice.info { border-left-color:var(--accent); }
+    .notice.warn { border-left-color:#f59e0b; }
+    .notice.good { border-left-color:var(--good); }
+    .searchbox { display:flex; align-items:center; gap:9px; padding:0 12px; min-height:40px; border:1px solid var(--line); border-radius:9px; background:rgba(0,0,0,.12); }
+    .searchbox input { width:100%; border:0; outline:0; color:var(--ink); background:transparent; }
+    .toc { display:grid; gap:3px; }
+    .toc a { display:flex; justify-content:space-between; padding:9px 10px; border-radius:7px; color:var(--muted); text-decoration:none; font-size:12px; }
+    .toc a:hover,.toc a.active { color:var(--ink); background:var(--surface-hover); }
+    .toc a.active { box-shadow:3px 0 0 var(--accent) inset; }
+    .article-head { display:flex; gap:12px; align-items:flex-start; margin-bottom:12px; }
+    .article-num { flex:0 0 auto; display:grid; place-items:center; width:34px; height:34px; border:1px solid var(--line-strong); border-radius:9px; font-weight:700; }
+    .article h3 { margin:0 0 3px; font-size:16px; }
+    .article p { margin:8px 0; color:var(--muted); font-size:12px; }
+    details { border:1px solid var(--line); border-radius:9px; background:var(--surface); }
+    summary { padding:11px 13px; color:var(--ink); font-weight:600; font-size:12px; cursor:pointer; }
+    details p { padding:0 13px 12px; margin:0; color:var(--muted); font-size:13px; }
+    .data-table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--line); border-radius:10px; font-size:12px; }
+    .data-table th,.data-table td { padding:10px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    .data-table th:last-child,.data-table td:last-child { border-right:0; }
+    .data-table tr:last-child td { border-bottom:0; }
+    .data-table th { color:var(--muted); background:var(--surface); font:500 12px/1.3 JetBrains Mono,monospace; letter-spacing:.05em; text-transform:uppercase; }
+    .data-table input { width:100%; min-width:90px; border:1px solid var(--line); border-radius:6px; padding:7px 8px; color:var(--ink); background:rgba(0,0,0,.1); }
+    .file-stack { overflow:hidden; border:1px solid var(--line); border-radius:11px; }
+    .file-row { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; padding:14px; background:var(--surface); }
+    .file-row+.file-row { border-top:1px dashed var(--line-strong); }
+    .file-row.amendment { background:rgba(255,255,255,.025); }
+    .file-name { font-size:13px; font-weight:650; word-break:break-word; }
+    .file-meta { margin-top:3px; color:var(--muted); font-size:12px; }
+    .file-kind { margin-bottom:3px; color:var(--muted); font:500 12px/1.2 JetBrains Mono,monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .sidepanel-demo { display:grid; grid-template-columns:1fr minmax(220px,.7fr); min-height:225px; overflow:hidden; border:1px solid var(--line); border-radius:11px; }
+    .sidepanel-page { padding:20px; background:rgba(0,0,0,.08); }
+    .sidepanel { padding:18px; border-left:1px solid var(--line); background:var(--panel); box-shadow:-16px 0 35px rgba(0,0,0,.14); }
+    .sidepanel-top { display:flex; justify-content:space-between; margin-bottom:15px; }
+    .close { width:28px; height:28px; border:1px solid var(--line); border-radius:7px; color:var(--muted); background:transparent; cursor:pointer; }
+    .skeleton { height:9px; margin:8px 0; border-radius:8px; background:var(--line-strong); }
+    .skeleton.short { width:63%; }
+    .demo-note { margin-top:18px; padding:13px 16px; border:1px dashed var(--line-strong); border-radius:11px; color:var(--muted); font-size:12px; text-align:center; }
+    @media (max-width:880px) { .links { display:none; } .workspace { grid-template-columns:1fr; } .hero { grid-template-columns:1fr; align-items:start; } .json-actions { justify-self:start; } .sample,.sample.third { grid-column:1/-1; } }
+    @media (max-width:610px) { .nav { padding:10px 14px; gap:10px; flex-wrap:wrap; } .brand span:last-child { display:none; } .nav-controls { width:auto; } .control label { display:none; } main { width:min(100% - 24px,1120px); padding-top:38px; } .form-grid { grid-template-columns:1fr; } .json-actions { width:100%; } .json-actions .btn { flex:1; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary navigation">
+    <div class="brand"><span class="mark">MV</span><span>Building Regulation Navigator</span></div>
+    <div class="links"><a href="#">Guideline</a><a class="active" href="#">Rules Checker</a><a href="#">Checklist</a><a href="#">Downloads</a></div>
+    <div class="nav-controls">
+      <div class="control"><label for="theme">Theme</label><select id="theme"><option value="minimalist">Minimalist</option><option value="classic">Classic</option></select></div>
+      <div class="control modes" aria-label="Appearance mode">
+        <button type="button" data-mode="light" class="active" aria-label="Light mode">☀</button>
+        <button type="button" data-mode="system" aria-label="System mode">◐</button>
+        <button type="button" data-mode="dark" aria-label="Dark mode">☾</button>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <section class="hero">
+      <div><div class="eyebrow">UI system preview</div><h1>Clear decisions, grounded in the regulation.</h1><p class="lede">A focused workspace for checking island building requirements, tracing the binding clause, and preparing project records.</p></div>
+      <div class="json-actions"><button class="btn" type="button">Import JSON</button><button class="btn primary" type="button">Export JSON</button></div>
+    </section>
+    <section class="workspace">
+      <article class="card">
+        <header class="card-head"><div><h2>Building inputs</h2><div class="sub">Residential · City · Without planning guidelines</div></div><div class="status">Ready</div></header>
+        <div class="form-grid">
+          <div class="field"><label for="plot">Plot area / footprint</label><div class="input-shell"><input id="plot" value="156.26"><span class="unit">m²</span></div></div>
+          <div class="field"><label for="road">Access road width</label><div class="input-shell"><input id="road" value="3.00"><span class="unit">m</span></div></div>
+          <div class="field"><label for="coefficient">Width coefficient</label><div class="input-shell"><input id="coefficient" value="4.50"><span class="unit">WC</span></div></div>
+          <div class="field"><label for="storeys">Proposed storeys</label><div class="input-shell"><select id="storeys"><option>5 storeys</option></select></div></div>
+        </div>
+        <div class="result">
+          <div class="result-label">Maximum buildable height</div><div class="height">25.20 m <small>82.68 ft</small></div>
+          <div class="basis"><div><span>Footprint formula (§9d)</span><span>61.75 m</span></div><div><span>Width coefficient ≥ 3.0 (§9g)</span><span>30.48 m</span></div><div class="binding"><span>Road 1.829–3.048 m (§9e / Table 3)</span><span><span class="tag">Binding</span> 25.20 m</span></div></div>
+        </div>
+      </article>
+      <aside class="card">
+        <header class="card-head"><div><h2>Checklist preview</h2><div class="sub">Click a clause to cycle its state</div></div></header>
+        <div class="checklist" id="checklist">
+          <div class="clause checked"><div class="state">✓</div><div class="clause-text">The site boundary matches the registered plot.</div><div class="ref">§7</div></div>
+          <div class="clause"><div class="state">—</div><div class="clause-text">The access-road name and width are shown.</div><div class="ref">§9e</div></div>
+          <div class="clause"><div class="state">—</div><div class="clause-text">The permitted building height is clearly labelled.</div><div class="ref">§9</div></div>
+          <div class="clause"><div class="state">—</div><div class="clause-text">Balcony and terrace details are included.</div><div class="ref">§19</div></div>
+        </div>
+        <footer class="foot"><span>1 of 4 reviewed</span><div class="progress"><span></span></div></footer>
+      </aside>
+    </section>
+    <section class="inventory">
+      <header class="inventory-head"><div><div class="eyebrow">Complete component inventory</div><h2>Every interface pattern in one place.</h2></div><span class="chip">Demo only</span></header>
+      <div class="inventory-grid">
+        <article class="card sample third">
+          <div class="sample-title">Buttons and states</div>
+          <div class="stack"><div class="button-row"><button class="btn primary">Primary</button><button class="btn">Secondary</button><button class="btn danger">Reset</button><button class="btn" disabled>Disabled</button></div><div class="chip-row"><span class="chip active">Active</span><span class="chip">External</span><span class="chip">§9e</span><span class="status">Compliant</span></div></div>
+        </article>
+        <article class="card sample third">
+          <div class="sample-title">Selection controls</div>
+          <div class="stack"><div class="choice-row"><label class="choice"><input type="checkbox" checked> Balconies</label><label class="choice"><input type="checkbox"> Basement</label></div><div class="choice-row"><label class="choice"><input type="radio" name="location" checked> City</label><label class="choice"><input type="radio" name="location"> Other island</label></div><div class="unit-toggle"><button class="active">m</button><button>ft</button></div></div>
+        </article>
+        <article class="card sample third">
+          <div class="sample-title">Search and navigation</div>
+          <div class="stack"><label class="searchbox">⌕<input type="search" placeholder="Search articles…"></label><nav class="toc"><a class="active" href="#">Chapter Three <span>8–14</span></a><a href="#">Height of buildings <span>§9</span></a><a href="#">Vacant space <span>§15</span></a></nav></div>
+        </article>
+        <article class="card sample">
+          <div class="sample-title">Inputs</div>
+          <div class="form-grid" style="padding:0">
+            <div class="field"><label>Text input</label><div class="input-shell"><input type="text" placeholder="Island / lot name"></div></div>
+            <div class="field"><label>Number with unit</label><div class="input-shell"><input type="number" value="156.26"><span class="unit">m²</span></div></div>
+            <div class="field"><label>Select menu</label><div class="input-shell"><select><option>Residential</option><option>Non-residential</option></select></div></div>
+            <div class="field"><label>Date</label><div class="input-shell"><input type="date" value="2026-09-12"></div></div>
+          </div>
+        </article>
+        <article class="card sample">
+          <div class="sample-title">Notices and validation</div>
+          <div class="stack"><div class="notice info"><strong>Source note</strong>This requirement comes directly from Article 9(e).</div><div class="notice warn"><strong>Authority confirmation required</strong>No maximum is stated for this combination.</div><div class="notice good"><strong>Within permitted height</strong>The planned height is below the binding maximum.</div></div>
+        </article>
+        <article class="card sample">
+          <div class="sample-title">Guideline article and source note</div>
+          <div class="article"><div class="article-head"><div class="article-num">9</div><div><h3>Height of buildings in cities</h3><div class="sub">Chapter Three · Residential land</div></div></div><p><b>(e)</b> The maximum building height is determined by the width of the access road or street.</p><details><summary>Note from the source</summary><p>The original measurement and amendment wording are preserved here for review.</p></details></div>
+        </article>
+        <article class="card sample">
+          <div class="sample-title">Regulation table</div>
+          <table class="data-table"><thead><tr><th>Access-road width</th><th>Maximum height</th><th>Basis</th></tr></thead><tbody><tr><td>1.829–3.048 m</td><td><b>25.20 m</b></td><td>§9e / Table 3</td></tr><tr><td>3.048–4.572 m</td><td>30.48 m</td><td>§9e / Table 3</td></tr></tbody></table>
+        </article>
+        <article class="card sample wide">
+          <div class="sample-title">Professional roster table</div>
+          <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>Registration</th><th></th></tr></thead><tbody><tr><td>Architectural checker</td><td><input value="Aminath Test"></td><td><input value="AC-0001"></td><td><button class="btn" aria-label="Save to roster">☆</button></td></tr><tr><td>Licensed engineer</td><td><input placeholder="Name"></td><td><input placeholder="Registration no."></td><td><button class="btn" aria-label="Save to roster">☆</button></td></tr></tbody></table></div>
+        </article>
+        <article class="card sample">
+          <div class="sample-title">Downloads and amendment hierarchy</div>
+          <div class="file-stack"><div class="file-row"><div><div class="file-name">2019-R-1002 · Original regulation.pdf</div><div class="file-meta">Original Dhivehi instrument · 1.2 MB</div></div><button class="btn">Download</button></div><div class="file-row amendment"><div><div class="file-kind">Amendment</div><div class="file-name">2020-R-9 · First Amendment.pdf</div><div class="file-meta">14 October 2020</div></div><button class="btn">Download</button></div><div class="file-row amendment"><div><div class="file-kind">Amendment</div><div class="file-name">2021-R-167 · Second Amendment.pdf</div><div class="file-meta">14 December 2021</div></div><button class="btn">Download</button></div></div>
+        </article>
+        <article class="card sample">
+          <div class="sample-title">Collapsible section and progress</div>
+          <div class="stack"><details open><summary>Project and professional details</summary><p>Expandable content for secondary information and floor-by-floor overrides.</p></details><div class="foot" style="padding:10px 0 0;border:0"><span>68 of 103 reviewed</span><div class="progress"><span></span></div></div></div>
+        </article>
+        <article class="card sample wide">
+          <div class="sample-title">Reference side panel</div>
+          <div class="sidepanel-demo"><div class="sidepanel-page"><span class="chip">Checker remains visible</span><div class="skeleton" style="margin-top:24px"></div><div class="skeleton"></div><div class="skeleton short"></div></div><aside class="sidepanel"><div class="sidepanel-top"><div><b>Article 9(e)</b><div class="sub">From the guideline</div></div><button class="close" aria-label="Close">×</button></div><p class="sub">The relevant clause is highlighted here without taking the user away from the checker.</p><div class="notice info"><strong>Binding clause</strong>Road width sets the lowest permitted maximum.</div></aside></div>
+        </article>
+      </div>
+    </section>
+    <div class="demo-note">Isolated design demo — existing application pages are unchanged.</div>
+  </main>
+  <script>
+    const root=document.documentElement, buttons=[...document.querySelectorAll('[data-mode]')];
+    function setMode(mode){const resolved=mode==='system'?(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark'):mode;root.dataset.mode=resolved;buttons.forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));}
+    buttons.forEach(button=>button.addEventListener('click',()=>setMode(button.dataset.mode)));
+    document.getElementById('theme').addEventListener('change',event=>root.dataset.themeName=event.target.value.toLowerCase());
+    document.querySelectorAll('.unit-toggle').forEach(group=>group.addEventListener('click',event=>{if(event.target.tagName!=='BUTTON')return;group.querySelectorAll('button').forEach(button=>button.classList.toggle('active',button===event.target));}));
+    document.querySelectorAll('.clause').forEach(row=>row.addEventListener('click',()=>{const box=row.querySelector('.state'),states=['—','✓','✗'],next=states[(states.indexOf(box.textContent)+1)%states.length];box.textContent=next;row.classList.toggle('checked',next==='✓');row.classList.toggle('failed',next==='✗');}));
+  </script>
+</body>
+</html>
