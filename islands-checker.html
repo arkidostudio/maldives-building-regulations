@@ -280,10 +280,6 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
   <a href="downloads.html">Downloads</a>
   <a href="disclaimer.html">Disclaimer</a>
   <div class="theme-controls">
-    <div class="grp" id="theme-name-picker">
-      <button data-name="classic">Classic</button>
-      <button data-name="modern">Modern</button>
-    </div>
     <div class="grp" id="theme-mode-picker">
       <button data-mode="light">☀</button>
       <button data-mode="system">◑</button>
@@ -1285,7 +1281,7 @@ render();
 // Theme picker
 const root = document.documentElement;
 function applyTheme() {
-  const name = localStorage.getItem("themeName") || "modern";
+  const name = "modern";
   const mode = localStorage.getItem("themeMode") || "system";
   root.setAttribute("data-theme-name", name === "classic" ? "classic" : "modern");
   if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode);

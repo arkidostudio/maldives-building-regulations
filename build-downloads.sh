@@ -91,10 +91,6 @@ h1 { font-family: '"'"'Fraunces'"'"', serif; font-weight:500; font-size:32px; co
   <a class="on" href="#">Downloads</a>
   <a href="disclaimer.html">Disclaimer</a>
   <div class="theme-controls">
-    <div class="grp" id="theme-name-picker">
-      <button data-name="classic">Classic</button>
-      <button data-name="modern">Modern</button>
-    </div>
     <div class="grp" id="theme-mode-picker">
       <button data-mode="light">☀</button>
       <button data-mode="system">◑</button>
@@ -173,7 +169,7 @@ importFile.addEventListener("change", async () => {
 });
 jsonRow.append(importBtn, importFile);
 const root = document.documentElement;
-function applyTheme() { const name = localStorage.getItem("themeName") || "classic"; const mode = localStorage.getItem("themeMode") || "system"; if (name === "modern") root.setAttribute("data-theme-name", "modern"); else root.removeAttribute("data-theme-name"); if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode); else root.removeAttribute("data-theme"); document.querySelectorAll("#theme-name-picker button").forEach((b) => b.classList.toggle("on", b.dataset.name === name)); document.querySelectorAll("#theme-mode-picker button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode)); }
+function applyTheme() { const mode = localStorage.getItem("themeMode") || "system"; root.setAttribute("data-theme-name", "modern"); if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode); else root.removeAttribute("data-theme"); document.querySelectorAll("#theme-mode-picker button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode)); }
 document.querySelectorAll("#theme-name-picker button").forEach((b) => { b.addEventListener("click", () => { try { localStorage.setItem("themeName", b.dataset.name); } catch(e) {} applyTheme(); }); });
 document.querySelectorAll("#theme-mode-picker button").forEach((b) => { b.addEventListener("click", () => { try { localStorage.setItem("themeMode", b.dataset.mode); } catch(e) {} applyTheme(); }); });
 applyTheme();

@@ -828,10 +828,6 @@
   <a href="downloads.html">Downloads</a>
   <a href="disclaimer.html">Disclaimer</a>
   <div class="theme-controls">
-    <div class="grp" id="theme-name-picker">
-      <button data-name="classic">Classic</button>
-      <button data-name="modern">Modern</button>
-    </div>
     <div class="grp" id="theme-mode-picker">
       <button data-mode="light" aria-label="Light mode">☀</button>
       <button data-mode="system" aria-label="System mode">◑</button>
@@ -1527,7 +1523,7 @@
   // Theme picker — name (classic|modern) and mode (light|system|dark)
   const root = document.documentElement;
   function applyTheme() {
-    const name = localStorage.getItem("themeName") || "modern";
+    const name = "modern";
     const mode = localStorage.getItem("themeMode") || "system";
     root.setAttribute("data-theme-name", name === "classic" ? "classic" : "modern");
     if (mode === "light" || mode === "dark") root.setAttribute("data-theme", mode);
