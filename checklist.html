@@ -261,6 +261,7 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
       <label>Atoll / Island<input type="text" data-key="atoll_island"></label>
       <label>Owner<input type="text" data-key="owner"></label>
       <label>Contact number<input type="text" data-key="contact"></label>
+      <label>Type of building<select data-key="building_use"><option value="">Select…</option><option>Residential</option><option>Mix-Residential</option><option>Office</option><option>Commercial</option><option>Industrial</option></select></label>
     </div>
   </div>
   <div class="proj-grp">
@@ -917,7 +918,7 @@ const PROJ_KEY = "islands-project-details-v1";
 let proj = {};
 try { proj = JSON.parse(localStorage.getItem(PROJ_KEY) || "{}"); } catch(e) { proj = {}; }
 function saveProj() { try { localStorage.setItem(PROJ_KEY, JSON.stringify(proj)); } catch(e) {} }
-document.querySelectorAll('#proj-form input[data-key], #pros-form input[data-key]').forEach((inp) => {
+document.querySelectorAll('#proj-form input[data-key], #proj-form select[data-key], #pros-form input[data-key]').forEach((inp) => {
   const k = inp.dataset.key;
   if (proj[k] !== undefined) inp.value = proj[k];
   inp.addEventListener('input', () => { proj[k] = inp.value; saveProj(); });
@@ -1130,7 +1131,7 @@ document.getElementById("reset").addEventListener("click", () => {
   state = {}; proj = {};
   document.querySelectorAll(".item .status-select, .floor-matrix select").forEach((select) => { select.value = ""; });
   document.querySelectorAll(".item").forEach((row) => applyStatusClass(row, ""));
-  document.querySelectorAll('#proj-form input, #pros-form input').forEach((inp) => { inp.value = ""; });
+  document.querySelectorAll('#proj-form input, #proj-form select, #pros-form input').forEach((inp) => { inp.value = ""; });
   updateProgress();
 });
 
@@ -1231,14 +1232,36 @@ async function fillCertificate(templateBytes) {
   if (!window.PDFLib) throw new Error("The PDF library did not load. Check your internet connection and try again.");
   const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
   const form = pdfDoc.getForm();
-  const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+  const tbi = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanBoldItalic);
+  const setText = (name, value) => {
+    try {
+      const f = form.getTextField(name);
+      f.setText(String(value || ""));
+      f.updateAppearances(tbi);
+    } catch(e) {}
+  };
   setText("ArchName", proj.arch_checker_name);
   setText("ChkRegNum", proj.arch_checker_regno);
   setText("Date7_af_date", todayDDMMMYYYY());
   setText("Plot Name", proj.island_lot_name);
   setText("CityAtollIsland", proj.atoll_island);
   setText("Plot Owner Name", proj.owner);
-  // BuildingUse is a dropdown; leave the template's default alone.
+  try {
+    const d = form.getDropdown("BuildingUse");
+    if (proj.building_use) d.select(proj.building_use);
+    d.updateAppearances(tbi);
+  } catch(e) {}
+
+  // Overlay the baked-in checker name ("Mohamed Razzan Abdulla") on page 1
+  // with whatever Architectural Checker name is in the app. Same font/size.
+  const archName = proj.arch_checker_name || "";
+  if (archName) {
+    const page = pdfDoc.getPages()[0];
+    // Cover the original text (baseline y=703.45, font size 11pt)
+    page.drawRectangle({ x: 118, y: 701, width: 260, height: 14, color: PDFLib.rgb(1, 1, 1) });
+    page.drawText(archName, { x: 119.55, y: 703.45, size: 11, font: tbi, color: PDFLib.rgb(0, 0, 0) });
+  }
+
   const output = await pdfDoc.save();
   const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "");
   const atoll = (proj.atoll_island || "ATOLL.ISLAND").replace(/[\\/:*?"<>|]/g, "");
