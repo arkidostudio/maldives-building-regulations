@@ -1237,8 +1237,7 @@ async function fillCertificate(templateBytes) {
     try {
       const f = form.getTextField(name);
       f.setText(String(value || ""));
-      f.updateAppearances(tbi);
-    } catch(e) {}
+    } catch(e) { console.warn("cert: setText failed for", name, e); }
   };
   setText("ArchName", proj.arch_checker_name);
   setText("ChkRegNum", proj.arch_checker_regno);
@@ -1249,20 +1248,23 @@ async function fillCertificate(templateBytes) {
   try {
     const d = form.getDropdown("BuildingUse");
     if (proj.building_use) d.select(proj.building_use);
-    d.updateAppearances(tbi);
-  } catch(e) {}
+  } catch(e) { console.warn("cert: BuildingUse set failed", e); }
+  // Rebuild every appearance with Times Bold Italic, so the template's
+  // stored values get replaced and the new text uses the right font.
+  form.updateFieldAppearances(tbi);
 
-  // Overlay the baked-in checker name ("Mohamed Razzan Abdulla") on page 1
-  // with whatever Architectural Checker name is in the app. Same font/size.
+  // Overlay the baked-in checker name on page 1. Measure the original width
+  // so the white cover is exactly as wide as the text it replaces.
   const archName = proj.arch_checker_name || "";
   if (archName) {
     const page = pdfDoc.getPages()[0];
-    // Cover the original text (baseline y=703.45, font size 11pt)
-    page.drawRectangle({ x: 118, y: 701, width: 260, height: 14, color: PDFLib.rgb(1, 1, 1) });
+    const originalText = "Mohamed Razzan Abdulla";
+    const origW = tbi.widthOfTextAtSize(originalText, 11);
+    page.drawRectangle({ x: 119.55, y: 701, width: origW + 2, height: 14, color: PDFLib.rgb(1, 1, 1) });
     page.drawText(archName, { x: 119.55, y: 703.45, size: 11, font: tbi, color: PDFLib.rgb(0, 0, 0) });
   }
 
-  const output = await pdfDoc.save();
+  const output = await pdfDoc.save({ updateFieldAppearances: false });
   const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "");
   const atoll = (proj.atoll_island || "ATOLL.ISLAND").replace(/[\\/:*?"<>|]/g, "");
   await saveBlob(`Arch-Checker-Certificate - ${plot} (${atoll}).pdf`, new Blob([output], { type: "application/pdf" }));
