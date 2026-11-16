@@ -1249,8 +1249,8 @@ certButton.addEventListener("click", async () => {
   certButton.disabled = true;
   certButton.textContent = "Preparing certificate…";
   try {
-    const response = await fetch(CERT_TEMPLATE_URL);
-    if (!response.ok) throw new Error("Certificate template unavailable");
+    const response = await fetch(encodeURI(CERT_TEMPLATE_URL));
+    if (!response.ok) throw new Error(`Certificate template unavailable (HTTP ${response.status})`);
     await fillCertificate(await response.arrayBuffer());
   } catch (error) {
     alert(error.message || "The certificate could not be prepared.");
