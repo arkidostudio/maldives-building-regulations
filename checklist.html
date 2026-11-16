@@ -1010,7 +1010,7 @@ CHECKLIST.forEach((sec, sectionIndex) => {
         const td = document.createElement("td");
         const select = document.createElement("select");
         select.setAttribute("aria-label", `${sec.items[rowIndex].text} - ${floor}`);
-        addStatusOptions(select, state.pdfFields?.[name] ?? state[`c${floorStart + rowIndex}`] ?? "");
+        addStatusOptions(select, state.pdfFields?.[name] ?? "");
         select.addEventListener("change", () => {
           state.pdfFields = state.pdfFields || {};
           state.pdfFields[name] = select.value;
