@@ -199,6 +199,7 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
 
 <nav class="topnav">
   <div class="brand">Maldives Building Regulations Hub</div>
+  <a href="index.html">Home</a>
   <a href="building-reg.html">Guideline</a>
   <a href="islands-checker.html">Rules Checker</a>
   <a class="on" href="#">Checklist</a>
@@ -880,8 +881,8 @@ const PDF_CHECKLIST_FIELDS = [
 if (PDF_CHECKLIST_FIELDS.length !== 103) throw new Error("PDF checklist mapping is incomplete");
 
 function addStatusOptions(select, value = "") {
-  [["", "—"], ["✓", "✓"], ["✗", "✗"]].forEach(([v, label]) => select.add(new Option(label, v)));
-  select.value = value === "–" ? "" : value;
+  [["", "—"], ["✓", "✓"]].forEach(([v, label]) => select.add(new Option(label, v)));
+  select.value = (value === "–" || value === "✗") ? "" : value;
 }
 
 function applyStatusClass(row, value) {
@@ -957,12 +958,11 @@ CHECKLIST.forEach((sec, sectionIndex) => {
       applyStatusClass(row, status.value);
       updateProgress();
     });
-    row.title = "Click the clause to cycle: — → ✓ → ✗";
+    row.title = "Click the clause to toggle: — ↔ ✓";
     row.addEventListener("click", (event) => {
       if (event.target.closest("select, a, button, input")) return;
       event.preventDefault();
-      const values = ["", "✓", "✗"];
-      status.value = values[(values.indexOf(status.value) + 1) % values.length];
+      status.value = status.value === "✓" ? "" : "✓";
       status.dispatchEvent(new Event("change"));
     });
     const txt = document.createElement("div");
