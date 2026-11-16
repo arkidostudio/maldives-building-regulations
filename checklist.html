@@ -245,6 +245,7 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
     <button id="uncheck-all">Clear all</button>
     <button id="export-pdf">Download filled Dhivehi PDF</button>
     <input type="file" id="pdf-template-file" accept="application/pdf,.pdf" hidden>
+    <button id="export-cert">Download Arch Checker Certificate</button>
     <button id="export-json">Export project (.json)</button>
     <button id="import-json">Import project</button>
     <input type="file" id="import-file" accept="application/json,.json" hidden>
@@ -1217,6 +1218,46 @@ document.getElementById("pdf-template-file").addEventListener("change", async (e
   try { await fillPdf(await file.arrayBuffer()); }
   catch (error) { alert(error.message || "The selected PDF could not be filled."); }
   finally { event.target.value = ""; }
+});
+
+// Architectural Checker's Certificate
+const CERT_TEMPLATE_URL = "sources/checklists/Arch-Checker-Certificate - HOUSE (ATOLL.ISLAND).pdf";
+function todayDDMMMYYYY() {
+  const d = new Date();
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${String(d.getDate()).padStart(2,"0")}-${months[d.getMonth()]}-${d.getFullYear()}`;
+}
+async function fillCertificate(templateBytes) {
+  if (!window.PDFLib) throw new Error("The PDF library did not load. Check your internet connection and try again.");
+  const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+  const form = pdfDoc.getForm();
+  const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+  setText("ArchName", proj.arch_checker_name);
+  setText("ChkRegNum", proj.arch_checker_regno);
+  setText("Date7_af_date", todayDDMMMYYYY());
+  setText("Plot Name", proj.island_lot_name);
+  setText("CityAtollIsland", proj.atoll_island);
+  setText("Plot Owner Name", proj.owner);
+  // BuildingUse is a dropdown; leave the template's default alone.
+  const output = await pdfDoc.save();
+  const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "");
+  const atoll = (proj.atoll_island || "ATOLL.ISLAND").replace(/[\\/:*?"<>|]/g, "");
+  await saveBlob(`Arch-Checker-Certificate - ${plot} (${atoll}).pdf`, new Blob([output], { type: "application/pdf" }));
+}
+const certButton = document.getElementById("export-cert");
+certButton.addEventListener("click", async () => {
+  certButton.disabled = true;
+  certButton.textContent = "Preparing certificate…";
+  try {
+    const response = await fetch(CERT_TEMPLATE_URL);
+    if (!response.ok) throw new Error("Certificate template unavailable");
+    await fillCertificate(await response.arrayBuffer());
+  } catch (error) {
+    alert(error.message || "The certificate could not be prepared.");
+  } finally {
+    certButton.disabled = false;
+    certButton.textContent = "Download Arch Checker Certificate";
+  }
 });
 
 // Export JSON
