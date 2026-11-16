@@ -129,6 +129,10 @@ h1 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 32px; color: v
 .floor-matrix th, .floor-matrix td { padding: 5px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
 .floor-matrix th:first-child, .floor-matrix td:first-child { position: sticky; left: 0; z-index: 1; min-width: 260px; text-align: left; background: var(--panel); }
 .floor-matrix select { width: 46px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--panel); color: var(--ink); }
+.floor-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 2px; font-size: 12px; color: var(--muted); }
+.floor-chip { background: transparent; border: 1px solid var(--line-strong); color: var(--muted); padding: 3px 10px; border-radius: 999px; font: inherit; font-size: 12px; cursor: pointer; }
+.floor-chip.on { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.floor-chip:hover { border-color: var(--accent); }
 .item.ticked { background: var(--ok-soft); border-color: var(--ok); }
 .item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: var(--ok); }
 .item-text { color: var(--ink); font-size: 14px; }
@@ -995,33 +999,54 @@ CHECKLIST.forEach((sec, sectionIndex) => {
     const floorStart = idx - sec.items.length;
     const details = document.createElement("details");
     details.className = "floor-matrix";
-    details.innerHTML = `<summary>Floor-by-floor PDF overrides</summary>`;
+    const FLOOR_LABELS = ["Ground", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Terrace"];
+    state.activeFloors = Array.isArray(state.activeFloors) ? state.activeFloors : PDF_FLOORS.slice();
+    const chips = `<div class="floor-chips">Floors in this building: ${PDF_FLOORS.map((code, i) => `<button type="button" class="floor-chip${state.activeFloors.includes(code) ? " on" : ""}" data-code="${code}">${FLOOR_LABELS[i]}</button>`).join("")}</div>`;
+    details.innerHTML = `<summary>Floor-by-floor PDF overrides</summary>${chips}`;
     const table = document.createElement("table");
-    table.innerHTML = `<thead><tr><th>Requirement</th>${["Ground", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Terrace"].map((floor) => `<th>${floor}</th>`).join("")}</tr></thead>`;
-    const tbody = document.createElement("tbody");
-    PDF_FLOOR_BASES.forEach((base, rowIndex) => {
-      const tr = document.createElement("tr");
-      tr.dataset.pdfBase = base;
-      const label = document.createElement("td");
-      label.textContent = sec.items[rowIndex].text;
-      tr.appendChild(label);
-      PDF_FLOORS.forEach((floor) => {
-        const name = `${base}-${floor}`;
-        const td = document.createElement("td");
-        const select = document.createElement("select");
-        select.setAttribute("aria-label", `${sec.items[rowIndex].text} - ${floor}`);
-        addStatusOptions(select, state.pdfFields?.[name] ?? "");
-        select.addEventListener("change", () => {
-          state.pdfFields = state.pdfFields || {};
-          state.pdfFields[name] = select.value;
-          saveState();
+    function visibleFloors() { return PDF_FLOORS.map((c, i) => ({ code: c, label: FLOOR_LABELS[i] })).filter((f) => state.activeFloors.includes(f.code)); }
+    function renderMatrix() {
+      const floors = visibleFloors();
+      table.innerHTML = `<thead><tr><th>Requirement</th>${floors.map((f) => `<th>${f.label}</th>`).join("")}</tr></thead>`;
+      const tbody = document.createElement("tbody");
+      PDF_FLOOR_BASES.forEach((base, rowIndex) => {
+        const tr = document.createElement("tr");
+        tr.dataset.pdfBase = base;
+        const label = document.createElement("td");
+        label.textContent = sec.items[rowIndex].text;
+        tr.appendChild(label);
+        floors.forEach((f) => {
+          const name = `${base}-${f.code}`;
+          const td = document.createElement("td");
+          const select = document.createElement("select");
+          select.setAttribute("aria-label", `${sec.items[rowIndex].text} - ${f.label}`);
+          addStatusOptions(select, state.pdfFields?.[name] ?? "");
+          select.addEventListener("change", () => {
+            state.pdfFields = state.pdfFields || {};
+            state.pdfFields[name] = select.value;
+            saveState();
+          });
+          td.appendChild(select);
+          tr.appendChild(td);
         });
-        td.appendChild(select);
-        tr.appendChild(td);
+        tbody.appendChild(tr);
       });
-      tbody.appendChild(tr);
+      table.appendChild(tbody);
+    }
+    renderMatrix();
+    details.addEventListener("click", (e) => {
+      const b = e.target.closest(".floor-chip");
+      if (!b) return;
+      e.preventDefault();
+      const code = b.dataset.code;
+      const i = state.activeFloors.indexOf(code);
+      if (i >= 0) state.activeFloors.splice(i, 1); else state.activeFloors.push(code);
+      // preserve canonical order
+      state.activeFloors = PDF_FLOORS.filter((c) => state.activeFloors.includes(c));
+      b.classList.toggle("on");
+      saveState();
+      renderMatrix();
     });
-    table.appendChild(tbody);
     details.appendChild(table);
     wrap.appendChild(details);
   }
