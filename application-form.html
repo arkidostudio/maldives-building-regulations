@@ -396,6 +396,14 @@ async function fillPermitPdf() {
   const doc = await PDFLib.PDFDocument.load(bytes);
   const form = doc.getForm();
   const helv = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+  // Wipe every field first so leftover template values can't bleed through
+  for (const f of form.getFields()) {
+    try {
+      if (f instanceof PDFLib.PDFTextField) f.setText("");
+      else if (f instanceof PDFLib.PDFCheckBox) f.uncheck();
+      else if (f instanceof PDFLib.PDFDropdown) f.select("");
+    } catch(e) {}
+  }
   const setText = (name, value) => {
     try { form.getTextField(name).setText(String(value ?? "")); }
     catch(e) { console.warn("permit: skip text", name, e.message); }
