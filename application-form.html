@@ -1,0 +1,491 @@
+<meta charset="utf-8">
+<title>Permit Application Form</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --ground: #f4f1e9; --panel: #fbf9f2; --ink: #211f27; --ink-soft: #524f5c;
+  --muted: #918d95; --line: #e5dfd0; --line-strong: #cec7b3;
+  --accent: #1f3b5c; --accent-soft: #e8eef6;
+  --ok: #3d5f43; --ok-soft: #e6ede4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #15171c; --panel: #1e2128; --ink: #ecebe4; --ink-soft: #b8bcc4;
+    --muted: #85889a; --line: #2b2f38; --line-strong: #3a3f4a;
+    --accent: #8bb3ea; --accent-soft: #22314b;
+    --ok: #a3c9a8; --ok-soft: #22322a;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #15171c; --panel: #1e2128; --ink: #ecebe4; --ink-soft: #b8bcc4;
+  --muted: #85889a; --line: #2b2f38; --line-strong: #3a3f4a;
+  --accent: #8bb3ea; --accent-soft: #22314b;
+  --ok: #a3c9a8; --ok-soft: #22322a;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink-soft); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+.topnav { position: sticky; top: 0; z-index: 90; background: var(--panel); border-bottom: 1px solid var(--line); padding: 12px 32px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; box-shadow: 0 8px 28px rgba(20, 30, 50, .08); }
+.topnav .brand { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink); margin-right: 6px; }
+.topnav a { color: var(--ink-soft); text-decoration: none; font-size: 13px; padding: 4px 2px; border-bottom: 2px solid transparent; }
+.topnav a:hover { color: var(--ink); }
+.topnav a.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.topnav .theme-controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.topnav .theme-controls .grp { display: flex; border: 1px solid var(--line-strong); border-radius: 5px; overflow: hidden; }
+.topnav .theme-controls .grp button { background: transparent; border: none; color: var(--muted); font: inherit; font-size: 11px; padding: 4px 8px; cursor: pointer; }
+.topnav .theme-controls .grp button.on { background: var(--accent); color: var(--panel); }
+
+.wrap { max-width: 900px; margin: 0 auto; padding: 32px 32px 100px; }
+header { margin-bottom: 20px; }
+.eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+h1 { font-family: 'Fraunces', serif; font-size: 28px; line-height: 1.2; color: var(--ink); margin: 0 0 8px; letter-spacing: -.01em; }
+.sub { font-size: 14px; max-width: 70ch; }
+.actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.actions button { background: var(--accent); color: var(--panel); border: 0; padding: 9px 16px; border-radius: 6px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.actions button:hover { opacity: .9; }
+.actions button.secondary { background: transparent; color: var(--ink-soft); border: 1px solid var(--line-strong); font-weight: 500; }
+.actions button.secondary:hover { background: var(--accent-soft); }
+
+.proj-form { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-top: 20px; }
+.proj-grp { margin-bottom: 18px; }
+.proj-grp:last-child { margin-bottom: 0; }
+.proj-grp > .grp-head { font-family: 'Fraunces', serif; font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.grp-head .hint { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 11px; color: var(--muted); letter-spacing: 0; text-transform: none; }
+.proj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 14px; }
+.proj-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.proj-grid input, .proj-grid textarea { padding: 8px 12px; border: 1px solid var(--line-strong); background: var(--ground); color: var(--ink); border-radius: 6px; font: inherit; font-size: 14px; outline: none; resize: vertical; }
+.proj-grid input:focus, .proj-grid textarea:focus { border-color: var(--accent); }
+.proj-grid .full { grid-column: 1 / -1; }
+.proj-grid .shared::after { content: " · from Checklist"; color: var(--ok); font-size: 10px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.cert-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cert-table th, .cert-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.cert-table th { color: var(--muted); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+.cert-table input { width: 100%; padding: 5px 8px; border: 1px solid var(--line); background: var(--ground); color: var(--ink); border-radius: 4px; font: inherit; font-size: 13px; outline: none; }
+.cert-table input:focus { border-color: var(--accent); }
+
+@media (max-width: 700px) { .proj-grid { grid-template-columns: 1fr; } }
+
+.check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; }
+@media (max-width: 700px) { .check-grid { grid-template-columns: 1fr; } }
+.check-grid label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); font-weight: 500; text-transform: none; letter-spacing: 0; cursor: pointer; padding: 6px 2px; }
+.check-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--ok); cursor: pointer; }
+
+/* Floor-use matrix */
+.fu-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 0 14px; font-size: 12px; color: var(--muted); }
+.fu-chip { background: transparent; border: 1px solid var(--line-strong); color: var(--muted); padding: 3px 10px; border-radius: 999px; font: inherit; font-size: 12px; cursor: pointer; }
+.fu-chip.on { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.fu-wrap { border: 1px solid var(--line); border-radius: 8px; overflow: auto; background: var(--ground); }
+.fu-table { width: 100%; border-collapse: collapse; font-size: 11.5px; table-layout: fixed; }
+.fu-table th, .fu-table td { padding: 4px 3px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
+.fu-table th:first-child, .fu-table td:first-child { position: sticky; left: 0; z-index: 1; width: 90px; text-align: left; background: var(--panel); padding: 4px 8px; color: var(--ink); font-weight: 600; }
+.fu-table th { color: var(--muted); font-weight: 600; font-size: 10.5px; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; user-select: none; }
+.fu-table th:first-child { cursor: default; }
+.fu-cell { width: 100%; min-width: 24px; height: 24px; padding: 0; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--panel); color: var(--muted); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+.fu-cell.on { background: var(--ok); color: var(--panel); border-color: var(--ok); }
+.fu-other { width: 100%; padding: 4px 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 4px; font: inherit; font-size: 12px; outline: none; }
+.fu-other:focus { border-color: var(--accent); }
+</style>
+<link rel="stylesheet" href="ui-theme.css">
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<nav class="topnav">
+  <div class="brand">Maldives Building Regulations Hub</div>
+  <a href="index.html">Home</a>
+  <a href="building-reg.html">Guideline</a>
+  <a href="islands-checker.html">Rules Checker</a>
+  <a href="checklist.html">Checklist</a>
+  <a class="on" href="#">Application Form</a>
+  <a href="downloads.html">Downloads</a>
+  <a href="disclaimer.html">Disclaimer</a>
+  <div class="theme-controls">
+    <div class="grp" id="theme-mode-picker">
+      <button data-mode="light">☀</button>
+      <button data-mode="system">◑</button>
+      <button data-mode="dark">☾</button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Form B1-BAPF01/2021V01</div>
+  <h1>Application for Drawing Approval &amp; Construction Permit</h1>
+  <div class="sub">Fields you've already entered on the Checklist (Plot details, Professionals) are pulled through and editable here. Fields marked <em>from Checklist</em> stay in sync with that page. Click <strong>Download Application PDF</strong> to export the filled form.</div>
+  <div class="actions">
+    <button id="download-pdf">Download Application PDF</button>
+    <button id="reset" class="secondary">Reset new fields</button>
+  </div>
+</header>
+
+<form id="app-form" autocomplete="off">
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Project information <span class="hint">8 fields</span></div>
+      <div class="proj-grid">
+        <label class="shared">Ward / Plot Name<input type="text" data-key="island_lot_name" data-store="proj"></label>
+        <label>Plot Registry &amp; Block No.<input type="text" data-key="plot_registry_number" data-store="app"></label>
+        <label class="shared">Plot Area (m²)<input type="number" step="0.01" data-key="plot_area" data-store="proj"></label>
+        <label>Island Name<input type="text" data-key="island_name" data-store="app"></label>
+        <label>Road Name<input type="text" data-key="road_name" data-store="app"></label>
+        <label class="shared">Building Height (m)<input type="number" step="0.01" data-key="building_height" data-store="proj"></label>
+        <label>Number of Floors<input type="number" step="1" min="0" data-key="floor_count" data-store="app"></label>
+        <label class="shared">Footprint Area (m²)<input type="number" step="0.01" data-key="building_area" data-store="proj"></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Permit types <span class="hint">tick what you're applying for</span></div>
+      <div class="check-grid">
+        <label><input type="checkbox" data-cb="permit_types.drawingApproval"> Drawing approval</label>
+        <label><input type="checkbox" data-cb="permit_types.constructionPermit"> Construction permit</label>
+        <label><input type="checkbox" data-cb="permit_types.conceptDrawingApproval"> Concept drawing approval</label>
+        <label><input type="checkbox" data-cb="permit_types.acceptanceOfWorks"> Acceptance of works</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Application reason <span class="hint">tick the reason for this application</span></div>
+      <div class="check-grid">
+        <label><input type="checkbox" data-cb="application_reasons.new"> New application</label>
+        <label><input type="checkbox" data-cb="application_reasons.drawingAmendment"> Drawing amendment</label>
+        <label><input type="checkbox" data-cb="application_reasons.renewal"> Expiry / renewal</label>
+        <label><input type="checkbox" data-cb="application_reasons.ownershipChange"> Ownership change</label>
+        <label><input type="checkbox" data-cb="application_reasons.plotNameChange"> Plot name change</label>
+        <label><input type="checkbox" data-cb="application_reasons.other"> Other</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Floor uses <span class="hint">tick which uses each floor has</span></div>
+      <div class="fu-chips" id="fu-chips"></div>
+      <div class="fu-wrap"><table class="fu-table" id="fu-table"></table></div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Previous permit <span class="hint">leave blank for a new application</span></div>
+      <div class="proj-grid">
+        <label>Previous permit number<input type="text" data-key="previous_permit_number" data-store="app"></label>
+        <label>Previous permit issue date<input type="date" data-key="previous_permit_issue_date" data-store="app"></label>
+        <label class="full">Other permit details<textarea rows="2" data-key="previous_permit_details" data-store="app"></textarea></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Plot owners <span class="hint">from Checklist · one name per line</span></div>
+      <div class="proj-grid">
+        <label class="full">Owner(s)<textarea rows="4" data-key="owner" data-store="proj" placeholder="One name per line"></textarea></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head">Professionals <span class="hint">from Checklist · names &amp; registry numbers only</span></div>
+      <table class="cert-table">
+        <thead><tr><th style="width:170px;">Role</th><th>Name</th><th style="width:170px;">Reg. / R.S. No.</th></tr></thead>
+        <tbody>
+          <tr><td>Licensed Architect</td><td><input type="text" data-key="lic_architect_name" data-store="proj"></td><td><input type="text" data-key="lic_architect_regno" data-store="proj"></td></tr>
+          <tr><td>Architectural Checker</td><td><input type="text" data-key="arch_checker_name" data-store="proj"></td><td><input type="text" data-key="arch_checker_regno" data-store="proj"></td></tr>
+          <tr><td>Architectural field</td><td><input type="text" data-key="arch_field_name" data-store="proj"></td><td><input type="text" data-key="arch_field_regno" data-store="proj"></td></tr>
+          <tr><td>Licensed Engineer</td><td><input type="text" data-key="lic_engineer_name" data-store="proj"></td><td><input type="text" data-key="lic_engineer_regno" data-store="proj"></td></tr>
+          <tr><td>Structural Checker</td><td><input type="text" data-key="struct_checker_name" data-store="proj"></td><td><input type="text" data-key="struct_checker_regno" data-store="proj"></td></tr>
+          <tr><td>Civil field</td><td><input type="text" data-key="civil_field_name" data-store="proj"></td><td><input type="text" data-key="civil_field_regno" data-store="proj"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</form>
+</div>
+
+<script>
+// ---------- Storage ----------
+const PROJ_KEY = "islands-project-details-v1";
+const APP_KEY = "islands-application-form-v1";
+const safeLoad = (k) => { try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch(e) { return {}; } };
+const safeSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
+let proj = safeLoad(PROJ_KEY);
+let app = safeLoad(APP_KEY);
+const stores = { proj, app };
+const storeKeys = { proj: PROJ_KEY, app: APP_KEY };
+
+// Populate inputs + wire two-way sync
+document.querySelectorAll('#app-form [data-key]').forEach((el) => {
+  const store = el.dataset.store;
+  const key = el.dataset.key;
+  if (stores[store][key] !== undefined) el.value = stores[store][key];
+  el.addEventListener('input', () => {
+    stores[store][key] = el.value;
+    safeSave(storeKeys[store], stores[store]);
+  });
+});
+
+// ---------- Simple checkboxes (permit types + application reasons) ----------
+function getPath(obj, path) { return path.split('.').reduce((o, k) => (o ? o[k] : undefined), obj); }
+function setPath(obj, path, val) {
+  const parts = path.split('.'); const last = parts.pop();
+  let o = obj; for (const p of parts) { o[p] = o[p] || {}; o = o[p]; }
+  o[last] = val;
+}
+document.querySelectorAll('#app-form [data-cb]').forEach((el) => {
+  const path = el.dataset.cb;
+  el.checked = !!getPath(app, path);
+  el.addEventListener('change', () => {
+    setPath(app, path, el.checked);
+    safeSave(APP_KEY, app);
+  });
+});
+
+// ---------- Floor-use matrix ----------
+const FU_FLOORS = [
+  { code: "BF",  label: "Basement" },
+  { code: "1F",  label: "1" },  { code: "2F",  label: "2" },  { code: "3F",  label: "3" },
+  { code: "4F",  label: "4" },  { code: "5F",  label: "5" },  { code: "6F",  label: "6" },
+  { code: "7F",  label: "7" },  { code: "8F",  label: "8" },  { code: "9F",  label: "9" },
+  { code: "10F", label: "10" }, { code: "11F", label: "11" }, { code: "12F", label: "12" },
+];
+const FU_USES = [
+  { key: "residential", label: "Residential" },
+  { key: "office",      label: "Office" },
+  { key: "commercial",  label: "Commercial" },
+  { key: "hotel",       label: "Hotel" },
+  { key: "restaurant",  label: "Restaurant" },
+  { key: "cafe",        label: "Cafe" },
+  { key: "terrace",     label: "Terrace" },
+  { key: "parking",     label: "Parking" },
+  { key: "warehouse",   label: "Warehouse" },
+];
+app.floor_uses = app.floor_uses || {};
+app.active_floors = Array.isArray(app.active_floors) ? app.active_floors : ["BF", "1F"];
+
+const fuChipsEl = document.getElementById('fu-chips');
+const fuTable = document.getElementById('fu-table');
+function renderFuChips() {
+  fuChipsEl.innerHTML = 'Floors in this building: ' + FU_FLOORS.map((f) =>
+    `<button type="button" class="fu-chip${app.active_floors.includes(f.code) ? " on" : ""}" data-code="${f.code}">${f.label}</button>`
+  ).join("");
+}
+function renderFuTable() {
+  const floors = FU_FLOORS.filter((f) => app.active_floors.includes(f.code));
+  fuTable.innerHTML = `<thead><tr><th>Floor</th>${FU_USES.map((u) => `<th>${u.label}</th>`).join("")}<th style="width:120px;">Other uses</th></tr></thead>`;
+  const tbody = document.createElement('tbody');
+  floors.forEach((f) => {
+    const row = app.floor_uses[f.code] = app.floor_uses[f.code] || {};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${f.label}</td>` + FU_USES.map((u) =>
+      `<td><button type="button" class="fu-cell${row[u.key] ? " on" : ""}" data-floor="${f.code}" data-use="${u.key}">${row[u.key] ? "✓" : "—"}</button></td>`
+    ).join("") + `<td><input type="text" class="fu-other" data-floor="${f.code}" value="${(row.otherUses || "").replace(/"/g, '&quot;')}"></td>`;
+    tbody.appendChild(tr);
+  });
+  fuTable.appendChild(tbody);
+}
+renderFuChips(); renderFuTable();
+
+document.getElementById('fu-chips').addEventListener('click', (e) => {
+  const b = e.target.closest('.fu-chip');
+  if (!b) return;
+  e.preventDefault();
+  const c = b.dataset.code;
+  const i = app.active_floors.indexOf(c);
+  if (i >= 0) app.active_floors.splice(i, 1); else app.active_floors.push(c);
+  app.active_floors = FU_FLOORS.map((f) => f.code).filter((c) => app.active_floors.includes(c));
+  b.classList.toggle('on');
+  safeSave(APP_KEY, app);
+  renderFuTable();
+});
+fuTable.addEventListener('click', (e) => {
+  const cell = e.target.closest('.fu-cell');
+  if (cell) {
+    const f = cell.dataset.floor, u = cell.dataset.use;
+    app.floor_uses[f] = app.floor_uses[f] || {};
+    app.floor_uses[f][u] = !app.floor_uses[f][u];
+    cell.classList.toggle('on', app.floor_uses[f][u]);
+    cell.textContent = app.floor_uses[f][u] ? "✓" : "—";
+    safeSave(APP_KEY, app);
+    return;
+  }
+  const head = e.target.closest('thead th');
+  if (head && head.textContent) {
+    const idx = Array.from(head.parentNode.children).indexOf(head) - 1;
+    if (idx < 0 || idx >= FU_USES.length) return;
+    const useKey = FU_USES[idx].key;
+    const floors = FU_FLOORS.filter((f) => app.active_floors.includes(f.code));
+    const allOn = floors.every((f) => (app.floor_uses[f.code] || {})[useKey]);
+    const v = !allOn;
+    floors.forEach((f) => {
+      app.floor_uses[f.code] = app.floor_uses[f.code] || {};
+      app.floor_uses[f.code][useKey] = v;
+    });
+    safeSave(APP_KEY, app);
+    renderFuTable();
+  }
+});
+fuTable.addEventListener('input', (e) => {
+  const inp = e.target.closest('.fu-other');
+  if (!inp) return;
+  const f = inp.dataset.floor;
+  app.floor_uses[f] = app.floor_uses[f] || {};
+  app.floor_uses[f].otherUses = inp.value;
+  safeSave(APP_KEY, app);
+});
+
+// If other tabs change plot-details, keep this page in sync
+window.addEventListener('storage', (e) => {
+  if (e.key === PROJ_KEY) {
+    proj = safeLoad(PROJ_KEY);
+    stores.proj = proj;
+    document.querySelectorAll('#app-form [data-store="proj"]').forEach((el) => {
+      const k = el.dataset.key;
+      if (document.activeElement === el) return; // don't clobber what the user is typing
+      el.value = proj[k] ?? "";
+    });
+  }
+});
+
+// Reset only the new (app-store) fields
+document.getElementById('reset').addEventListener('click', () => {
+  if (!confirm('Clear the Application Form-only fields? Fields shared with the Checklist stay.')) return;
+  app = {};
+  safeSave(APP_KEY, app);
+  stores.app = app;
+  app.floor_uses = {};
+  app.active_floors = ["BF", "1F"];
+  document.querySelectorAll('#app-form [data-store="app"]').forEach((el) => { el.value = ""; });
+  document.querySelectorAll('#app-form [data-cb]').forEach((el) => { el.checked = false; });
+  renderFuChips(); renderFuTable();
+});
+
+// ---------- PDF generation ----------
+const PERMIT_TEMPLATE_URL = "sources/checklists/00 - Application-Form-for-Drawing-Approval-Construction-Permit (FILLABLE).pdf";
+function todayDDMMYYYY() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`;
+}
+function toDDMMYYYY(iso) {
+  if (!iso) return "";
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
+}
+async function saveBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function fillPermitPdf() {
+  if (!window.PDFLib) throw new Error("The PDF library did not load. Check your internet connection and try again.");
+  const r = await fetch(encodeURI(PERMIT_TEMPLATE_URL));
+  if (!r.ok) throw new Error(`Template unavailable (HTTP ${r.status})`);
+  const bytes = await r.arrayBuffer();
+  const doc = await PDFLib.PDFDocument.load(bytes);
+  const form = doc.getForm();
+  const helv = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const setText = (name, value) => {
+    try { form.getTextField(name).setText(String(value ?? "")); }
+    catch(e) { console.warn("permit: skip text", name, e.message); }
+  };
+
+  const owners = (proj.owner || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+
+  const map = {
+    // Section 1 — Project info
+    "Building Height":        proj.building_height,
+    "Number of Floors":       app.floor_count,
+    "Footprint Area":         proj.building_area,
+    "Island Name":            app.island_name,
+    "Plot Area":              proj.plot_area,
+    "Registry No & Block No": app.plot_registry_number,
+    "Road Name":              app.road_name,
+    "Ward / Plot Name":       proj.island_lot_name,
+    // Section 4 — Previous permit
+    "Permit Number":  app.previous_permit_number,
+    "Permit Date":    toDDMMYYYY(app.previous_permit_issue_date),
+    "Other Details":  app.previous_permit_details,
+    // Section 6 — Architectural professionals
+    "Arch Registered Name":          proj.lic_architect_name,
+    "Arch Registered RegNo":         proj.lic_architect_regno,
+    "ArchChk Registered Name":       proj.arch_checker_name,
+    "ArchChk Registered RegNo":      proj.arch_checker_regno,
+    "Arch Field Registered Name":    proj.arch_field_name,
+    "Arch Field Registered RegNo":   proj.arch_field_regno,
+    // Section 7 — Structural professionals
+    "Str Registered Name":           proj.lic_engineer_name,
+    "Str Registered RegNo":          proj.lic_engineer_regno,
+    "StrChk Registered Name":        proj.struct_checker_name,
+    "StrChk Registered RegNo":       proj.struct_checker_regno,
+    "Str Field Registered Name":     proj.civil_field_name,
+    "Str Field Registered RegNo":    proj.civil_field_regno,
+    // Shared signed-on date
+    "Date": todayDDMMYYYY(),
+  };
+  // Owners 1..7
+  owners.slice(0, 7).forEach((name, i) => { map[`Owner ${i + 1} Name`] = name; });
+
+  // Floor-use text fields (Other uses per floor)
+  Object.entries(app.floor_uses || {}).forEach(([code, uses]) => {
+    if (uses && uses.otherUses) map[`${code}_Other Uses`] = uses.otherUses;
+  });
+
+  for (const [name, value] of Object.entries(map)) setText(name, value);
+
+  // Checkboxes — permit types, application reasons, floor uses
+  const setCb = (name, on) => {
+    try {
+      const cb = form.getCheckBox(name);
+      if (on) cb.check(); else cb.uncheck();
+    } catch(e) { console.warn("permit: skip checkbox", name, e.message); }
+  };
+  const pt = app.permit_types || {};
+  setCb("Drawing Approval",   !!pt.drawingApproval);
+  setCb("Building Permit",    !!pt.constructionPermit);
+  setCb("Concept Approval",   !!pt.conceptDrawingApproval);
+  setCb("Work Acceptance",    !!pt.acceptanceOfWorks);
+  const ar = app.application_reasons || {};
+  setCb("New Approval",       !!ar.new);
+  setCb("Drawing Ammendment", !!ar.drawingAmendment);  // template spelling
+  setCb("Approval Renewal",   !!ar.renewal);
+  setCb("Plot Owner Change",  !!ar.ownershipChange);
+  setCb("Plot Name Change",   !!ar.plotNameChange);
+  setCb("Others",             !!ar.other);
+  const useKeyToPdf = { cafe: "Cafe", commercial: "Comm", hotel: "Hotel", office: "Office", parking: "Parking", residential: "Res", restaurant: "Restaurant", terrace: "Terrace", warehouse: "Warehouse" };
+  Object.entries(app.floor_uses || {}).forEach(([code, uses]) => {
+    if (!uses) return;
+    Object.entries(useKeyToPdf).forEach(([k, suffix]) => {
+      setCb(`${code}_${suffix}`, !!uses[k]);
+    });
+  });
+
+  form.updateFieldAppearances(helv);
+  const out = await doc.save({ updateFieldAppearances: false });
+
+  const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "").trim() || "HOUSE";
+  const atoll = (proj.atoll_island || app.island_name || "ATOLL.ISLAND").replace(/[\\/:*?"<>|]/g, "").trim() || "ATOLL.ISLAND";
+  await saveBlob(`Application-Form - ${plot} (${atoll}).pdf`, new Blob([out], { type: "application/pdf" }));
+}
+
+const dlBtn = document.getElementById('download-pdf');
+dlBtn.addEventListener('click', async () => {
+  dlBtn.disabled = true;
+  const original = dlBtn.textContent;
+  dlBtn.textContent = "Preparing PDF…";
+  try { await fillPermitPdf(); }
+  catch (e) { alert(e.message || "The Application PDF could not be prepared."); }
+  finally { dlBtn.disabled = false; dlBtn.textContent = original; }
+});
+</script>

@@ -125,10 +125,20 @@ h1 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 32px; color: v
 .item.status-na { opacity: .72; }
 .floor-matrix { margin: 12px 0 4px; border: 1px solid var(--line); border-radius: 8px; overflow: auto; background: var(--ground); }
 .floor-matrix summary { cursor: pointer; padding: 10px 12px; color: var(--ink); font-weight: 600; }
-.floor-matrix table { min-width: 980px; width: 100%; border-collapse: collapse; font-size: 11px; }
-.floor-matrix th, .floor-matrix td { padding: 5px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
-.floor-matrix th:first-child, .floor-matrix td:first-child { position: sticky; left: 0; z-index: 1; min-width: 260px; text-align: left; background: var(--panel); }
-.floor-matrix select { width: 46px; padding: 3px; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--panel); color: var(--ink); }
+.floor-matrix table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+.floor-matrix th, .floor-matrix td { padding: 4px 2px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); text-align: center; }
+.floor-matrix th:first-child, .floor-matrix td:first-child { position: sticky; left: 0; z-index: 1; width: 44%; text-align: left; background: var(--panel); white-space: normal; padding: 4px 8px; }
+.floor-matrix th { cursor: pointer; user-select: none; }
+.floor-matrix th:first-child { cursor: default; }
+.cell-toggle { width: 100%; min-width: 24px; height: 24px; padding: 0; border: 1px solid var(--line-strong); border-radius: 4px; background: var(--panel); color: var(--muted); font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; }
+.cell-toggle.on { background: var(--ok); color: var(--panel); border-color: var(--ok); }
+.matrix-actions { display: flex; gap: 6px; padding: 4px 2px 10px; }
+.matrix-actions button { background: transparent; border: 1px solid var(--line-strong); color: var(--ink-soft); font: inherit; font-size: 11.5px; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
+.matrix-actions button:hover { background: var(--accent-soft); }
+.floor-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 2px; font-size: 12px; color: var(--muted); }
+.floor-chip { background: transparent; border: 1px solid var(--line-strong); color: var(--muted); padding: 3px 10px; border-radius: 999px; font: inherit; font-size: 12px; cursor: pointer; }
+.floor-chip.on { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.floor-chip:hover { border-color: var(--accent); }
 .item.ticked { background: var(--ok-soft); border-color: var(--ok); }
 .item input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: var(--ok); }
 .item-text { color: var(--ink); font-size: 14px; }
@@ -199,9 +209,11 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
 
 <nav class="topnav">
   <div class="brand">Maldives Building Regulations Hub</div>
+  <a href="index.html">Home</a>
   <a href="building-reg.html">Guideline</a>
   <a href="islands-checker.html">Rules Checker</a>
   <a class="on" href="#">Checklist</a>
+  <a href="application-form.html">Application Form</a>
   <a href="downloads.html">Downloads</a>
   <a href="disclaimer.html">Disclaimer</a>
   <div class="theme-controls">
@@ -234,6 +246,7 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
     <button id="uncheck-all">Clear all</button>
     <button id="export-pdf">Download filled Dhivehi PDF</button>
     <input type="file" id="pdf-template-file" accept="application/pdf,.pdf" hidden>
+    <button id="export-cert">Download Arch Checker Certificate</button>
     <button id="export-json">Export project (.json)</button>
     <button id="import-json">Import project</button>
     <input type="file" id="import-file" accept="application/json,.json" hidden>
@@ -247,8 +260,9 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
     <div class="proj-grid">
       <label class="full">Island / Lot name<input type="text" data-key="island_lot_name"></label>
       <label>Atoll / Island<input type="text" data-key="atoll_island"></label>
-      <label>Owner<input type="text" data-key="owner"></label>
+      <label class="full">Owner(s) <small style="text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">— one name per line</small><textarea data-key="owner" rows="3" style="width:100%; padding:8px 10px; border:1px solid var(--line-strong); background:var(--panel); color:var(--ink); border-radius:6px; font:inherit; resize:vertical;"></textarea></label>
       <label>Contact number<input type="text" data-key="contact"></label>
+      <label>Type of building<select data-key="building_use"><option value="">Select…</option><option>Residential</option><option>Mix-Residential</option><option>Office</option><option>Commercial</option><option>Industrial</option></select></label>
     </div>
   </div>
   <div class="proj-grp">
@@ -880,8 +894,8 @@ const PDF_CHECKLIST_FIELDS = [
 if (PDF_CHECKLIST_FIELDS.length !== 103) throw new Error("PDF checklist mapping is incomplete");
 
 function addStatusOptions(select, value = "") {
-  [["", "—"], ["✓", "✓"], ["✗", "✗"]].forEach(([v, label]) => select.add(new Option(label, v)));
-  select.value = value === "–" ? "" : value;
+  [["", "—"], ["✓", "✓"]].forEach(([v, label]) => select.add(new Option(label, v)));
+  select.value = (value === "–" || value === "✗") ? "" : value;
 }
 
 function applyStatusClass(row, value) {
@@ -905,7 +919,7 @@ const PROJ_KEY = "islands-project-details-v1";
 let proj = {};
 try { proj = JSON.parse(localStorage.getItem(PROJ_KEY) || "{}"); } catch(e) { proj = {}; }
 function saveProj() { try { localStorage.setItem(PROJ_KEY, JSON.stringify(proj)); } catch(e) {} }
-document.querySelectorAll('#proj-form input[data-key], #pros-form input[data-key]').forEach((inp) => {
+document.querySelectorAll('#proj-form input[data-key], #proj-form select[data-key], #proj-form textarea[data-key], #pros-form input[data-key]').forEach((inp) => {
   const k = inp.dataset.key;
   if (proj[k] !== undefined) inp.value = proj[k];
   inp.addEventListener('input', () => { proj[k] = inp.value; saveProj(); });
@@ -957,12 +971,11 @@ CHECKLIST.forEach((sec, sectionIndex) => {
       applyStatusClass(row, status.value);
       updateProgress();
     });
-    row.title = "Click the clause to cycle: — → ✓ → ✗";
+    row.title = "Click the clause to toggle: — ↔ ✓";
     row.addEventListener("click", (event) => {
       if (event.target.closest("select, a, button, input")) return;
       event.preventDefault();
-      const values = ["", "✓", "✗"];
-      status.value = values[(values.indexOf(status.value) + 1) % values.length];
+      status.value = status.value === "✓" ? "" : "✓";
       status.dispatchEvent(new Event("change"));
     });
     const txt = document.createElement("div");
@@ -995,33 +1008,93 @@ CHECKLIST.forEach((sec, sectionIndex) => {
     const floorStart = idx - sec.items.length;
     const details = document.createElement("details");
     details.className = "floor-matrix";
-    details.innerHTML = `<summary>Floor-by-floor PDF overrides</summary>`;
+    // Roof is UI-only (not in PDF field map)
+    const UI_FLOOR_CODES = [...PDF_FLOORS, "RF"];
+    const UI_FLOOR_LABELS = ["Ground", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Terrace", "Roof"];
+    state.activeFloors = Array.isArray(state.activeFloors) ? state.activeFloors : UI_FLOOR_CODES.slice();
+    const chips = `<div class="floor-chips">Floors in this building: ${UI_FLOOR_CODES.map((code, i) => `<button type="button" class="floor-chip${state.activeFloors.includes(code) ? " on" : ""}" data-code="${code}">${UI_FLOOR_LABELS[i]}</button>`).join("")}</div>`;
+    const actions = `<div class="matrix-actions"><button type="button" data-matrix-fill="✓">Mark visible cells ✓</button><button type="button" data-matrix-fill="">Clear visible cells</button></div>`;
+    details.innerHTML = `<summary>Floor-by-floor PDF overrides</summary>${chips}${actions}`;
     const table = document.createElement("table");
-    table.innerHTML = `<thead><tr><th>Requirement</th>${["Ground", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Terrace"].map((floor) => `<th>${floor}</th>`).join("")}</tr></thead>`;
-    const tbody = document.createElement("tbody");
-    PDF_FLOOR_BASES.forEach((base, rowIndex) => {
-      const tr = document.createElement("tr");
-      tr.dataset.pdfBase = base;
-      const label = document.createElement("td");
-      label.textContent = sec.items[rowIndex].text;
-      tr.appendChild(label);
-      PDF_FLOORS.forEach((floor) => {
-        const name = `${base}-${floor}`;
-        const td = document.createElement("td");
-        const select = document.createElement("select");
-        select.setAttribute("aria-label", `${sec.items[rowIndex].text} - ${floor}`);
-        addStatusOptions(select, state.pdfFields?.[name] ?? state[`c${floorStart + rowIndex}`] ?? "");
-        select.addEventListener("change", () => {
-          state.pdfFields = state.pdfFields || {};
-          state.pdfFields[name] = select.value;
-          saveState();
-        });
-        td.appendChild(select);
-        tr.appendChild(td);
+    function visibleFloors() { return UI_FLOOR_CODES.map((c, i) => ({ code: c, label: UI_FLOOR_LABELS[i] })).filter((f) => state.activeFloors.includes(f.code)); }
+    function cellBtn(name, initialValue, labelText) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "cell-toggle"; b.setAttribute("aria-label", labelText); b.dataset.name = name;
+      b.textContent = initialValue === "✓" ? "✓" : "—";
+      if (initialValue === "✓") b.classList.add("on");
+      b.addEventListener("click", () => {
+        const next = b.classList.contains("on") ? "" : "✓";
+        b.classList.toggle("on", next === "✓");
+        b.textContent = next === "✓" ? "✓" : "—";
+        state.pdfFields = state.pdfFields || {};
+        state.pdfFields[name] = next;
+        saveState();
       });
-      tbody.appendChild(tr);
+      return b;
+    }
+    function renderMatrix() {
+      const floors = visibleFloors();
+      table.innerHTML = `<thead><tr><th>Requirement</th>${floors.map((f) => `<th data-floor="${f.code}" title="Click to fill this column">${f.label}</th>`).join("")}</tr></thead>`;
+      const tbody = document.createElement("tbody");
+      PDF_FLOOR_BASES.forEach((base, rowIndex) => {
+        const tr = document.createElement("tr");
+        tr.dataset.pdfBase = base;
+        tr.dataset.rowIndex = rowIndex;
+        const label = document.createElement("td");
+        label.textContent = sec.items[rowIndex].text;
+        tr.appendChild(label);
+        floors.forEach((f) => {
+          const name = `${base}-${f.code}`;
+          const td = document.createElement("td");
+          td.appendChild(cellBtn(name, state.pdfFields?.[name] ?? "", `${sec.items[rowIndex].text} - ${f.label}`));
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+    }
+    renderMatrix();
+    details.addEventListener("click", (e) => {
+      const chip = e.target.closest(".floor-chip");
+      if (chip) {
+        e.preventDefault();
+        const code = chip.dataset.code;
+        const i = state.activeFloors.indexOf(code);
+        if (i >= 0) state.activeFloors.splice(i, 1); else state.activeFloors.push(code);
+        state.activeFloors = UI_FLOOR_CODES.filter((c) => state.activeFloors.includes(c));
+        chip.classList.toggle("on");
+        saveState();
+        renderMatrix();
+        return;
+      }
+      const fillBtn = e.target.closest("[data-matrix-fill]");
+      if (fillBtn) {
+        const v = fillBtn.dataset.matrixFill;
+        table.querySelectorAll(".cell-toggle").forEach((b) => {
+          b.classList.toggle("on", v === "✓");
+          b.textContent = v === "✓" ? "✓" : "—";
+          state.pdfFields = state.pdfFields || {};
+          state.pdfFields[b.dataset.name] = v;
+        });
+        saveState();
+        return;
+      }
+      const colHead = e.target.closest("thead th[data-floor]");
+      if (colHead) {
+        const code = colHead.dataset.floor;
+        const suffix = "-" + code;
+        const cells = [...table.querySelectorAll(".cell-toggle")].filter((b) => b.dataset.name.endsWith(suffix));
+        const allOn = cells.every((b) => b.classList.contains("on"));
+        const v = allOn ? "" : "✓";
+        cells.forEach((b) => {
+          b.classList.toggle("on", v === "✓");
+          b.textContent = v === "✓" ? "✓" : "—";
+          state.pdfFields = state.pdfFields || {};
+          state.pdfFields[b.dataset.name] = v;
+        });
+        saveState();
+      }
     });
-    table.appendChild(tbody);
     details.appendChild(table);
     wrap.appendChild(details);
   }
@@ -1059,7 +1132,7 @@ document.getElementById("reset").addEventListener("click", () => {
   state = {}; proj = {};
   document.querySelectorAll(".item .status-select, .floor-matrix select").forEach((select) => { select.value = ""; });
   document.querySelectorAll(".item").forEach((row) => applyStatusClass(row, ""));
-  document.querySelectorAll('#proj-form input, #pros-form input').forEach((inp) => { inp.value = ""; });
+  document.querySelectorAll('#proj-form input, #proj-form select, #proj-form textarea, #pros-form input').forEach((inp) => { inp.value = ""; });
   updateProgress();
 });
 
@@ -1147,6 +1220,132 @@ document.getElementById("pdf-template-file").addEventListener("change", async (e
   try { await fillPdf(await file.arrayBuffer()); }
   catch (error) { alert(error.message || "The selected PDF could not be filled."); }
   finally { event.target.value = ""; }
+});
+
+// Architectural Checker's Certificate — generated from scratch (no template PDF)
+function todayDDMMMYYYY() {
+  const d = new Date();
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${String(d.getDate()).padStart(2,"0")}-${months[d.getMonth()]}-${d.getFullYear()}`;
+}
+async function buildCertificatePdf() {
+  if (!window.PDFLib) throw new Error("The PDF library did not load. Check your internet connection and try again.");
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595.25, 842.0]);
+  const T = await doc.embedFont(StandardFonts.TimesRoman);
+  const Tb = await doc.embedFont(StandardFonts.TimesRomanBold);
+  const Ti = await doc.embedFont(StandardFonts.TimesRomanItalic);
+  const Tbi = await doc.embedFont(StandardFonts.TimesRomanBoldItalic);
+  const black = rgb(0, 0, 0);
+  const draw = (text, x, y, opts = {}) => page.drawText(String(text ?? ""), { x, y, size: opts.size || 11, font: opts.font || T, color: black });
+  const GAP = T.widthOfTextAtSize(" ", 11);
+
+  // Title + subtitle
+  draw("ARCHITECTURAL CHECKER’S CERTIFCATE", 144.3, 766, { size: 14, font: Tb });
+  draw("For architectural design compliance - category B1", 169.6, 739.2, { size: 12, font: Tb });
+
+  // Clause 1
+  draw("1.", 90, 703.5);
+  draw("I, ", 108, 703.5);
+  const archName = proj.arch_checker_name || "";
+  draw(archName, 119.55, 703.5, { font: Tbi });
+  const archW = Tbi.widthOfTextAtSize(archName, 11);
+  draw(" being a registered checker, hereby certifies that I have in", 119.55 + archW, 703.5);
+  draw("accordance with Male’ Planning Regulation and other applicable regulations relevant to", 108, 684.5);
+  draw("planning, design and construction of buildings set out by the Government Authorities, have", 108, 665.5);
+  draw("carried out an evaluation and review of the drawings of the building works attached and to the", 108, 646.5);
+  draw("best of my knowledge and belief the drawings do not show any incompliance in the design of", 108, 627.4);
+  draw("the building to be erected or by the works carried out in accordance with those drawings.", 108, 608.4);
+
+  // Clause 2 + a-g
+  draw("2.", 90, 589.4);
+  draw("In arriving at my conclusion, I confirm that I have reviewed and checked the design in", 108, 589.4);
+  draw("accordance with the relevant regulations using the following criteria: -", 108, 570.7);
+  draw("a.", 125.8, 541.6); draw("rules and regulations set out by the authorities in relation to building design and", 143.8, 541.6);
+  draw("construction;", 143.8, 528.9);
+  draw("b.", 125.8, 506.1); draw("codes of practice adopted in the design;", 143.8, 506.1);
+  draw("c.", 125.8, 483.6); draw("standards and specifications of materials;", 143.8, 483.6);
+  draw("d.", 125.8, 460.9); draw("architectural design concept;", 143.8, 460.9);
+  draw("e.", 125.8, 438.4); draw("architectural detailing;", 143.8, 438.4);
+  draw("f.", 125.8, 415.6);
+  const fText = "appropriate checklists set out by the authorities (included with this Certificate);";
+  draw(fText, 143.8, 415.6);
+  const fRightX = 143.8 + T.widthOfTextAtSize(fText, 11);
+  draw("g.", 125.8, 393.1); draw("others", 143.8, 393.1);
+  const specifyPrefix = "specify ";
+  const specifyPrefixW = Ti.widthOfTextAtSize(specifyPrefix, 11);
+  const dotW = Ti.widthOfTextAtSize(".", 11);
+  const dotCount = Math.max(1, Math.round((fRightX - (143.8 + specifyPrefixW)) / dotW));
+  draw(specifyPrefix + ".".repeat(dotCount), 143.8, 380.4, { font: Ti });
+
+  // Field helper: value one space after the colon
+  function field(labelText, labelX, y, valueText, labelFont = T, valueFont = Tbi) {
+    const normalized = labelText.replace(/\s*:\s*$/, ":");
+    draw(normalized, labelX, y, { font: labelFont });
+    const lw = labelFont.widthOfTextAtSize(normalized, 11);
+    if (valueText) draw(valueText, labelX + lw + GAP, y, { font: valueFont });
+  }
+  field("Plot Name/No :", 72, 345.1, proj.island_lot_name);
+  field("Name of Architect:", 310.6, 345.1, proj.arch_checker_name);
+  field("City/Atoll/Island:", 72, 316.1, proj.atoll_island);
+  field("Date:", 310.6, 316.1, todayDDMMMYYYY());
+  field("Type of Building (use):", 72, 287.1, proj.building_use);
+  field("Checker’s Reg. Number :", 310.6, 287.1, proj.arch_checker_regno, Ti);
+
+  // Owner(s): split on newlines, join with ", ", wrap. First line sits after label; wraps anchor to x=72.
+  {
+    const owners = (proj.owner || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    const labelText = "Plot Owner’s Name :";
+    draw(labelText, 72, 258.1, { font: Ti });
+    const lw = Ti.widthOfTextAtSize(labelText, 11);
+    const valueX = 72 + lw + GAP;
+    const maxX = 305;
+    const lineH = 13;
+    if (owners.length) {
+      const joined = owners.join(", ");
+      const words = joined.split(" ");
+      let line = "", y = 258.1, lineNum = 0;
+      const limit = () => lineNum === 0 ? (maxX - valueX) : (maxX - 72);
+      const startX = () => lineNum === 0 ? valueX : 72;
+      for (const w of words) {
+        const trial = line ? line + " " + w : w;
+        if (Tbi.widthOfTextAtSize(trial, 11) <= limit()) line = trial;
+        else { draw(line, startX(), y, { font: Tbi }); y -= lineH; lineNum++; line = w; }
+      }
+      if (line) draw(line, startX(), y, { font: Tbi });
+    }
+  }
+  draw("Checker’s Signature:", 310.6, 258.1, { font: Ti });
+
+  // Stamp label block
+  draw("Official Stamp of the ", 429.9, 144.3);
+  draw("Registered Architectural Checker  ", 375.9, 131.6);
+
+  // Footer: separator line, label, two outlined boxes
+  page.drawLine({ start: { x: 70.5, y: 114.77 }, end: { x: 70.5 + 454.45, y: 114.77 }, thickness: 0.75, color: black });
+  draw("FOR OFFICIAL USE ONLY", 72, 104.5);
+  page.drawRectangle({ x: 72.025, y: 53.275, width: 244.6, height: 48.245, borderColor: black, borderWidth: 0.5, opacity: 0 });
+  page.drawRectangle({ x: 316.63, y: 53.275, width: 206.85, height: 48.245, borderColor: black, borderWidth: 0.5, opacity: 0 });
+  draw("Building Permit No.:", 77.8, 91.5);
+  draw("…".repeat(21), 77.8, 66.0);
+  draw("Local Authority’s Stamp", 322.4, 91.5);
+
+  const bytes = await doc.save();
+  const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "");
+  const atoll = (proj.atoll_island || "ATOLL.ISLAND").replace(/[\\/:*?"<>|]/g, "");
+  await saveBlob(`Arch-Checker-Certificate - ${plot} (${atoll}).pdf`, new Blob([bytes], { type: "application/pdf" }));
+}
+const certButton = document.getElementById("export-cert");
+certButton.addEventListener("click", async () => {
+  certButton.disabled = true;
+  certButton.textContent = "Preparing certificate…";
+  try { await buildCertificatePdf(); }
+  catch (error) { alert(error.message || "The certificate could not be prepared."); }
+  finally {
+    certButton.disabled = false;
+    certButton.textContent = "Download Arch Checker Certificate";
+  }
 });
 
 // Export JSON
