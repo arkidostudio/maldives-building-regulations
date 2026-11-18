@@ -480,6 +480,7 @@ async function fillPermitPdf() {
   });
 
   form.updateFieldAppearances(helv);
+  form.flatten();
   const out = await doc.save({ updateFieldAppearances: false });
 
   const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "").trim() || "HOUSE";
