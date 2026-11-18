@@ -190,7 +190,10 @@ h1 { font-family: 'Fraunces', serif; font-size: 28px; line-height: 1.2; color: v
         <span>Plot owners</span>
         <button type="button" id="add-owner" style="background:transparent;border:1px solid var(--line-strong);color:var(--ink-soft);padding:4px 10px;border-radius:5px;font:inherit;font-size:12px;cursor:pointer;">+ Add plot owner</button>
       </div>
-      <div id="owners-list"></div>
+      <table class="cert-table" id="owners-table">
+        <thead><tr><th style="width:28px;"></th><th style="width:40px;">#</th><th>Name</th><th style="width:170px;">ID card number</th><th style="width:28px;"></th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
 
@@ -267,29 +270,33 @@ document.querySelectorAll('#app-form [data-cb]').forEach((el) => {
 
 // ---------- Owners editor ----------
 const OWNERS_MAX = 7;
-const ownersList = document.getElementById('owners-list');
+const ownersTbody = document.querySelector('#owners-table tbody');
 function renderOwners() {
-  ownersList.innerHTML = app.owners.map((o, i) => `
-    <div class="owner-row" data-idx="${i}" style="border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:8px; background:var(--ground);">
-      <div style="display:grid; grid-template-columns: 24px 1fr 1fr auto; gap:8px; align-items:center;">
-        <button type="button" class="owner-toggle" style="background:transparent; border:1px solid var(--line-strong); border-radius:4px; width:22px; height:22px; cursor:pointer; color:var(--ink-soft); font:inherit; font-size:11px;">▸</button>
-        <input type="text" class="owner-name" placeholder="Owner ${i+1} name" value="${(o.name || '').replace(/"/g,'&quot;')}">
-        <input type="text" class="owner-id" placeholder="ID card number" value="${(o.id || '').replace(/"/g,'&quot;')}">
-        ${i > 0 ? `<button type="button" class="owner-del" title="Remove owner" style="background:transparent; border:0; color:var(--muted); cursor:pointer; font:inherit; font-size:16px;">×</button>` : '<span></span>'}
-      </div>
-      <div class="owner-more" hidden style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--line);">
-        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Phone<input type="text" class="owner-phone" value="${(o.phone || '').replace(/"/g,'&quot;')}"></label>
-        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Email<input type="text" class="owner-email" value="${(o.email || '').replace(/"/g,'&quot;')}"></label>
-      </div>
-    </div>`).join('');
+  ownersTbody.innerHTML = app.owners.map((o, i) => `
+    <tr class="owner-row" data-idx="${i}">
+      <td><button type="button" class="owner-toggle" style="background:transparent; border:1px solid var(--line-strong); border-radius:4px; width:22px; height:22px; cursor:pointer; color:var(--ink-soft); font:inherit; font-size:11px;">▸</button></td>
+      <td>${i + 1}</td>
+      <td><input type="text" class="owner-name" value="${(o.name || '').replace(/"/g,'&quot;')}"></td>
+      <td><input type="text" class="owner-id" value="${(o.id || '').replace(/"/g,'&quot;')}"></td>
+      <td>${i > 0 ? `<button type="button" class="owner-del" title="Remove owner" style="background:transparent; border:0; color:var(--muted); cursor:pointer; font:inherit; font-size:16px;">×</button>` : ''}</td>
+    </tr>
+    <tr class="owner-more" data-idx="${i}" hidden>
+      <td></td>
+      <td colspan="4">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Phone<input type="text" class="owner-phone" value="${(o.phone || '').replace(/"/g,'&quot;')}"></label>
+          <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Email<input type="text" class="owner-email" value="${(o.email || '').replace(/"/g,'&quot;')}"></label>
+        </div>
+      </td>
+    </tr>`).join('');
 }
 renderOwners();
-ownersList.addEventListener('click', (e) => {
-  const row = e.target.closest('.owner-row');
+ownersTbody.addEventListener('click', (e) => {
+  const row = e.target.closest('tr');
   if (!row) return;
   const idx = Number(row.dataset.idx);
   if (e.target.closest('.owner-toggle')) {
-    const more = row.querySelector('.owner-more');
+    const more = ownersTbody.querySelector(`tr.owner-more[data-idx="${idx}"]`);
     const open = more.hidden;
     more.hidden = !open;
     e.target.textContent = open ? '▾' : '▸';
@@ -301,8 +308,8 @@ ownersList.addEventListener('click', (e) => {
     renderOwners();
   }
 });
-ownersList.addEventListener('input', (e) => {
-  const row = e.target.closest('.owner-row');
+ownersTbody.addEventListener('input', (e) => {
+  const row = e.target.closest('tr');
   if (!row) return;
   const idx = Number(row.dataset.idx);
   const cls = e.target.className;
