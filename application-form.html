@@ -253,6 +253,7 @@ document.querySelectorAll('#app-form [data-cb]').forEach((el) => {
 // ---------- Floor-use matrix ----------
 const FU_FLOORS = [
   { code: "BF",  label: "Basement" },
+  { code: "GF",  label: "Ground" },
   { code: "1F",  label: "1" },  { code: "2F",  label: "2" },  { code: "3F",  label: "3" },
   { code: "4F",  label: "4" },  { code: "5F",  label: "5" },  { code: "6F",  label: "6" },
   { code: "7F",  label: "7" },  { code: "8F",  label: "8" },  { code: "9F",  label: "9" },
@@ -270,7 +271,7 @@ const FU_USES = [
   { key: "warehouse",   label: "Warehouse" },
 ];
 app.floor_uses = app.floor_uses || {};
-app.active_floors = Array.isArray(app.active_floors) ? app.active_floors : ["BF", "1F"];
+app.active_floors = Array.isArray(app.active_floors) ? app.active_floors : ["GF", "1F"];
 
 const fuChipsEl = document.getElementById('fu-chips');
 const fuTable = document.getElementById('fu-table');
@@ -363,7 +364,7 @@ document.getElementById('reset').addEventListener('click', () => {
   safeSave(APP_KEY, app);
   stores.app = app;
   app.floor_uses = {};
-  app.active_floors = ["BF", "1F"];
+  app.active_floors = ["GF", "1F"];
   document.querySelectorAll('#app-form [data-store="app"]').forEach((el) => { el.value = ""; });
   document.querySelectorAll('#app-form [data-cb]').forEach((el) => { el.checked = false; });
   renderFuChips(); renderFuTable();
@@ -395,8 +396,37 @@ async function fillPermitPdf() {
   const bytes = await r.arrayBuffer();
   const doc = await PDFLib.PDFDocument.load(bytes);
   const form = doc.getForm();
-  const helv = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
-  // Wipe every field first so leftover template values can't bleed through
+  const italic = await doc.embedFont(PDFLib.StandardFonts.HelveticaOblique);
+  const bold = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+  const INK = PDFLib.rgb(0.11, 0.23, 0.36);
+
+  // Build widget → {page, rect} map by matching each page's /Annots by Rect
+  const pages = doc.getPages();
+  const rectToPages = new Map();
+  pages.forEach((page, idx) => {
+    const rawAnnots = page.node.get(PDFLib.PDFName.of('Annots'));
+    if (!rawAnnots) return;
+    const annots = doc.context.lookup(rawAnnots);
+    if (!annots || !annots.size) return;
+    for (let i = 0; i < annots.size(); i++) {
+      const dict = doc.context.lookup(annots.get(i));
+      const rect = dict && dict.get(PDFLib.PDFName.of('Rect'));
+      if (!rect) continue;
+      const key = rect.toString();
+      if (!rectToPages.has(key)) rectToPages.set(key, []);
+      rectToPages.get(key).push(idx);
+    }
+  });
+  const widgetLoc = (w) => {
+    const r = w.dict.get(PDFLib.PDFName.of('Rect'));
+    const pgs = r && rectToPages.get(r.toString());
+    const pgIdx = pgs && pgs.length ? pgs.shift() : null;
+    if (pgIdx === null || !r) return null;
+    const [x1, y1, x2, y2] = r.asArray ? r.asArray().map(n => n.asNumber()) : [r.get(0), r.get(1), r.get(2), r.get(3)].map(n => n.asNumber());
+    return { page: pages[pgIdx], x1, y1, x2, y2 };
+  };
+
+  // Wipe every field — we'll draw values directly on pages, but we remove AcroForm at the end
   for (const f of form.getFields()) {
     try {
       if (f instanceof PDFLib.PDFTextField) f.setText("");
@@ -404,9 +434,45 @@ async function fillPermitPdf() {
       else if (f instanceof PDFLib.PDFDropdown) f.select("");
     } catch(e) {}
   }
+
   const setText = (name, value) => {
-    try { form.getTextField(name).setText(String(value ?? "")); }
-    catch(e) { console.warn("permit: skip text", name, e.message); }
+    if (value === undefined || value === null || value === "") return;
+    let field;
+    try { field = form.getTextField(name); } catch(e) { console.warn("permit: skip text", name, e.message); return; }
+    const widgets = field.acroField.getWidgets();
+    if (!widgets.length) return;
+    const loc = widgetLoc(widgets[0]);
+    if (!loc) return;
+    const text = String(value).toUpperCase();
+    const rectW = loc.x2 - loc.x1, rectH = loc.y2 - loc.y1;
+    // Multiline for owners / details
+    const isMulti = /\n/.test(text) || rectH > 22;
+    const size = Math.min(10, Math.max(7, rectH - 4));
+    if (isMulti) {
+      const lines = text.split(/\n/);
+      lines.forEach((ln, i) => {
+        loc.page.drawText(ln, { x: loc.x1 + 2, y: loc.y2 - size - 2 - i * (size + 2), size, font: italic, color: INK });
+      });
+    } else {
+      // Clip overflow by reducing font if needed
+      let s = size;
+      while (s > 6 && italic.widthOfTextAtSize(text, s) > rectW - 4) s -= 0.5;
+      loc.page.drawText(text, { x: loc.x1 + 2, y: loc.y1 + (rectH - s) / 2 + 1, size: s, font: italic, color: INK });
+    }
+  };
+
+  const setCb = (name, on) => {
+    if (!on) return;
+    let cb;
+    try { cb = form.getCheckBox(name); } catch(e) { console.warn("permit: skip checkbox", name, e.message); return; }
+    for (const w of cb.acroField.getWidgets()) {
+      const loc = widgetLoc(w);
+      if (!loc) continue;
+      const rectW = loc.x2 - loc.x1, rectH = loc.y2 - loc.y1;
+      const size = Math.min(rectW, rectH) * 0.95;
+      // Draw an X across the box
+      loc.page.drawText('X', { x: loc.x1 + rectW * 0.15, y: loc.y1 + rectH * 0.1, size, font: bold, color: INK });
+    }
   };
 
   const owners = (proj.owner || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
@@ -479,35 +545,10 @@ async function fillPermitPdf() {
     });
   });
 
-  form.updateFieldAppearances(helv);
-  // Template's widgets are missing /P (page) refs, so flatten throws. Rebuild the
-  // widget→page mapping from each page's /Annots by matching Rect, then flatten so
-  // every viewer renders values (field dicts alone don't paint in some viewers).
-  const pages = doc.getPages();
-  const rectToPages = new Map();
-  pages.forEach((page, idx) => {
-    const rawAnnots = page.node.get(PDFLib.PDFName.of('Annots'));
-    if (!rawAnnots) return;
-    const annots = doc.context.lookup(rawAnnots);
-    if (!annots || !annots.size) return;
-    for (let i = 0; i < annots.size(); i++) {
-      const dict = doc.context.lookup(annots.get(i));
-      const rect = dict && dict.get(PDFLib.PDFName.of('Rect'));
-      if (!rect) continue;
-      const key = rect.toString();
-      if (!rectToPages.has(key)) rectToPages.set(key, []);
-      rectToPages.get(key).push(idx);
-    }
-  });
-  for (const field of form.getFields()) {
-    for (const w of field.acroField.getWidgets()) {
-      const rect = w.dict.get(PDFLib.PDFName.of('Rect'));
-      const pgs = rect && rectToPages.get(rect.toString());
-      if (pgs && pgs.length) w.setP(pages[pgs.shift()].ref);
-    }
-  }
-  try { form.flatten(); } catch(e) { console.warn('flatten failed, falling back to NeedAppearances', e); form.acroForm.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.True); }
-  const out = await doc.save({ updateFieldAppearances: false });
+  // Strip the AcroForm so empty field widgets don't paint over our drawn values
+  doc.catalog.delete(PDFLib.PDFName.of('AcroForm'));
+  for (const page of pages) page.node.delete(PDFLib.PDFName.of('Annots'));
+  const out = await doc.save();
 
   const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "").trim() || "HOUSE";
   const atoll = (proj.atoll_island || app.island_name || "ATOLL.ISLAND").replace(/[\\/:*?"<>|]/g, "").trim() || "ATOLL.ISLAND";
