@@ -519,12 +519,6 @@ async function fillPermitPdf() {
   for (const [name, value] of Object.entries(map)) setText(name, value);
 
   // Checkboxes — permit types, application reasons, floor uses
-  const setCb = (name, on) => {
-    try {
-      const cb = form.getCheckBox(name);
-      if (on) cb.check(); else cb.uncheck();
-    } catch(e) { console.warn("permit: skip checkbox", name, e.message); }
-  };
   const pt = app.permit_types || {};
   setCb("Drawing Approval",   !!pt.drawingApproval);
   setCb("Building Permit",    !!pt.constructionPermit);
