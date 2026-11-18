@@ -480,7 +480,8 @@ async function fillPermitPdf() {
   });
 
   form.updateFieldAppearances(helv);
-  form.flatten();
+  // Tell viewers to regenerate appearances on open — Preview et al. won't display ours otherwise
+  form.acroForm.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.True);
   const out = await doc.save({ updateFieldAppearances: false });
 
   const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "").trim() || "HOUSE";
