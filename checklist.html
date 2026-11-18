@@ -1172,6 +1172,7 @@ async function fillPdf(templateBytes) {
   const form = pdfDoc.getForm();
   const markFont = await pdfDoc.embedFont(PDFLib.StandardFonts.ZapfDingbats);
   const dashFont = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+  const italicFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaOblique);
   const textValues = {};
   [1, 2, 3, 4, 5].forEach((page) => {
     textValues[`p${page}-ISLAND-LOT-NAME`] = proj.island_lot_name;
@@ -1180,7 +1181,20 @@ async function fillPdf(templateBytes) {
     textValues[`p${page}-CONTACT`] = proj.contact;
   });
   Object.entries(PDF_TEXT_FIELDS).forEach(([field, key]) => { textValues[field] = proj[key]; });
-  Object.entries(textValues).forEach(([name, value]) => form.getTextField(name).setText(String(value || "")));
+  Object.entries(textValues).forEach(([name, value]) => {
+    try {
+      const tf = form.getTextField(name);
+      tf.setText(String(value || "").toUpperCase());
+      // Blue #0732FF in PDF-space 0..1
+      tf.acroField.setDefaultAppearance('/HelvObl 10 Tf 0.027 0.196 1 rg');
+    } catch(e) {}
+  });
+  // Regenerate text appearances with the italic font (dropdowns handled below)
+  form.getFields().forEach((f) => {
+    if (f instanceof PDFLib.PDFTextField) {
+      try { f.updateAppearances(italicFont); } catch(e) {}
+    }
+  });
 
   PDF_CHECKLIST_FIELDS.forEach((fieldNames, itemIndex) => {
     const itemStatus = typeof state[`c${itemIndex}`] === "boolean" ? (state[`c${itemIndex}`] ? "✓" : "") : (state[`c${itemIndex}`] || "");
@@ -1241,11 +1255,10 @@ async function buildCertificatePdf() {
   const Ti = await doc.embedFont(StandardFonts.TimesRomanItalic);
   const Tbi = await doc.embedFont(StandardFonts.TimesRomanBoldItalic);
   const black = rgb(0, 0, 0);
-  const INK = rgb(7/255, 50/255, 255/255);
   const draw = (text, x, y, opts = {}) => page.drawText(String(text ?? ""), { x, y, size: opts.size || 11, font: opts.font || T, color: opts.color || black });
   const drawVal = (text, x, y, opts = {}) => {
     if (!text) return;
-    page.drawText(String(text).toUpperCase(), { x, y, size: opts.size || 11, font: opts.font || Ti, color: INK });
+    page.drawText(String(text), { x, y, size: opts.size || 11, font: opts.font || Tbi, color: black });
   };
   const GAP = T.widthOfTextAtSize(" ", 11);
 
@@ -1260,7 +1273,7 @@ async function buildCertificatePdf() {
   // Clause 1
   draw("1.", 90, 703.5);
   draw("I, ", 108, 703.5);
-  const archName = (proj.arch_checker_name || "").toUpperCase();
+  const archName = proj.arch_checker_name || "";
   drawVal(archName, 119.55, 703.5, { font: Tbi });
   const archW = Tbi.widthOfTextAtSize(archName, 11);
   draw(" being a registered checker, hereby certifies that I have in", 119.55 + archW, 703.5);
