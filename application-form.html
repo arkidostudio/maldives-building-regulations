@@ -480,8 +480,33 @@ async function fillPermitPdf() {
   });
 
   form.updateFieldAppearances(helv);
-  // Tell viewers to regenerate appearances on open — Preview et al. won't display ours otherwise
-  form.acroForm.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.True);
+  // Template's widgets are missing /P (page) refs, so flatten throws. Rebuild the
+  // widget→page mapping from each page's /Annots by matching Rect, then flatten so
+  // every viewer renders values (field dicts alone don't paint in some viewers).
+  const pages = doc.getPages();
+  const rectToPages = new Map();
+  pages.forEach((page, idx) => {
+    const rawAnnots = page.node.get(PDFLib.PDFName.of('Annots'));
+    if (!rawAnnots) return;
+    const annots = doc.context.lookup(rawAnnots);
+    if (!annots || !annots.size) return;
+    for (let i = 0; i < annots.size(); i++) {
+      const dict = doc.context.lookup(annots.get(i));
+      const rect = dict && dict.get(PDFLib.PDFName.of('Rect'));
+      if (!rect) continue;
+      const key = rect.toString();
+      if (!rectToPages.has(key)) rectToPages.set(key, []);
+      rectToPages.get(key).push(idx);
+    }
+  });
+  for (const field of form.getFields()) {
+    for (const w of field.acroField.getWidgets()) {
+      const rect = w.dict.get(PDFLib.PDFName.of('Rect'));
+      const pgs = rect && rectToPages.get(rect.toString());
+      if (pgs && pgs.length) w.setP(pages[pgs.shift()].ref);
+    }
+  }
+  try { form.flatten(); } catch(e) { console.warn('flatten failed, falling back to NeedAppearances', e); form.acroForm.dict.set(PDFLib.PDFName.of('NeedAppearances'), PDFLib.PDFBool.True); }
   const out = await doc.save({ updateFieldAppearances: false });
 
   const plot = (proj.island_lot_name || "HOUSE").replace(/[\\/:*?"<>|]/g, "").trim() || "HOUSE";
