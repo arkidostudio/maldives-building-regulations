@@ -186,25 +186,30 @@ h1 { font-family: 'Fraunces', serif; font-size: 28px; line-height: 1.2; color: v
 
   <div class="proj-form">
     <div class="proj-grp">
-      <div class="grp-head">Plot owners <span class="hint">from Checklist · one name per line</span></div>
+      <div class="grp-head">
+        <span>Plot owners</span>
+        <button type="button" id="add-owner" style="background:transparent;border:1px solid var(--line-strong);color:var(--ink-soft);padding:4px 10px;border-radius:5px;font:inherit;font-size:12px;cursor:pointer;">+ Add plot owner</button>
+      </div>
+      <div id="owners-list"></div>
+    </div>
+  </div>
+
+  <div class="proj-form">
+    <div class="proj-grp">
+      <div class="grp-head"><span>Date signed</span><span class="hint">applies to every signed section on the PDF</span></div>
       <div class="proj-grid">
-        <label class="full">Owner(s)<textarea rows="4" data-key="owner" data-store="proj" placeholder="One name per line"></textarea></label>
+        <label>Date<input type="date" data-key="signed_date" data-store="proj"></label>
       </div>
     </div>
   </div>
 
   <div class="proj-form">
     <div class="proj-grp">
-      <div class="grp-head">Professionals <span class="hint">from Checklist · names &amp; registry numbers only</span></div>
-      <table class="cert-table">
-        <thead><tr><th style="width:170px;">Role</th><th>Name</th><th style="width:170px;">Reg. / R.S. No.</th></tr></thead>
+      <div class="grp-head">Professionals <span class="hint">name &amp; reg. no. come from Checklist · expand each row for extras</span></div>
+      <table class="cert-table" id="pros-ext-table">
+        <thead><tr><th style="width:28px;"></th><th style="width:170px;">Role</th><th>Name</th><th style="width:170px;">Reg. / R.S. No.</th></tr></thead>
         <tbody>
-          <tr><td>Licensed Architect</td><td><input type="text" data-key="lic_architect_name" data-store="proj"></td><td><input type="text" data-key="lic_architect_regno" data-store="proj"></td></tr>
-          <tr><td>Architectural Checker</td><td><input type="text" data-key="arch_checker_name" data-store="proj"></td><td><input type="text" data-key="arch_checker_regno" data-store="proj"></td></tr>
-          <tr><td>Architectural field</td><td><input type="text" data-key="arch_field_name" data-store="proj"></td><td><input type="text" data-key="arch_field_regno" data-store="proj"></td></tr>
-          <tr><td>Licensed Engineer</td><td><input type="text" data-key="lic_engineer_name" data-store="proj"></td><td><input type="text" data-key="lic_engineer_regno" data-store="proj"></td></tr>
-          <tr><td>Structural Checker</td><td><input type="text" data-key="struct_checker_name" data-store="proj"></td><td><input type="text" data-key="struct_checker_regno" data-store="proj"></td></tr>
-          <tr><td>Civil field</td><td><input type="text" data-key="civil_field_name" data-store="proj"></td><td><input type="text" data-key="civil_field_regno" data-store="proj"></td></tr>
+          <!-- Rows injected by JS -->
         </tbody>
       </table>
     </div>
@@ -220,6 +225,16 @@ const safeLoad = (k) => { try { return JSON.parse(localStorage.getItem(k) || "{}
 const safeSave = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
 let proj = safeLoad(PROJ_KEY);
 let app = safeLoad(APP_KEY);
+// Legacy migration: multi-line proj.owner → first owner only
+if (typeof proj.owner === "string" && proj.owner.includes("\n")) {
+  const first = proj.owner.split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || "";
+  proj.owner = first;
+  safeSave(PROJ_KEY, proj);
+}
+proj.pro_details = proj.pro_details || {};
+if (!Array.isArray(app.owners) || app.owners.length === 0) {
+  app.owners = [{ name: proj.owner || "", id: "", phone: proj.contact || "", email: "" }];
+}
 const stores = { proj, app };
 const storeKeys = { proj: PROJ_KEY, app: APP_KEY };
 
@@ -248,6 +263,114 @@ document.querySelectorAll('#app-form [data-cb]').forEach((el) => {
     setPath(app, path, el.checked);
     safeSave(APP_KEY, app);
   });
+});
+
+// ---------- Owners editor ----------
+const OWNERS_MAX = 7;
+const ownersList = document.getElementById('owners-list');
+function renderOwners() {
+  ownersList.innerHTML = app.owners.map((o, i) => `
+    <div class="owner-row" data-idx="${i}" style="border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:8px; background:var(--ground);">
+      <div style="display:grid; grid-template-columns: 24px 1fr 1fr auto; gap:8px; align-items:center;">
+        <button type="button" class="owner-toggle" style="background:transparent; border:1px solid var(--line-strong); border-radius:4px; width:22px; height:22px; cursor:pointer; color:var(--ink-soft); font:inherit; font-size:11px;">▸</button>
+        <input type="text" class="owner-name" placeholder="Owner ${i+1} name" value="${(o.name || '').replace(/"/g,'&quot;')}">
+        <input type="text" class="owner-id" placeholder="ID card number" value="${(o.id || '').replace(/"/g,'&quot;')}">
+        ${i > 0 ? `<button type="button" class="owner-del" title="Remove owner" style="background:transparent; border:0; color:var(--muted); cursor:pointer; font:inherit; font-size:16px;">×</button>` : '<span></span>'}
+      </div>
+      <div class="owner-more" hidden style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px; padding-top:8px; border-top:1px solid var(--line);">
+        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Phone<input type="text" class="owner-phone" value="${(o.phone || '').replace(/"/g,'&quot;')}"></label>
+        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Email<input type="text" class="owner-email" value="${(o.email || '').replace(/"/g,'&quot;')}"></label>
+      </div>
+    </div>`).join('');
+}
+renderOwners();
+ownersList.addEventListener('click', (e) => {
+  const row = e.target.closest('.owner-row');
+  if (!row) return;
+  const idx = Number(row.dataset.idx);
+  if (e.target.closest('.owner-toggle')) {
+    const more = row.querySelector('.owner-more');
+    const open = more.hidden;
+    more.hidden = !open;
+    e.target.textContent = open ? '▾' : '▸';
+    return;
+  }
+  if (e.target.closest('.owner-del')) {
+    app.owners.splice(idx, 1);
+    safeSave(APP_KEY, app);
+    renderOwners();
+  }
+});
+ownersList.addEventListener('input', (e) => {
+  const row = e.target.closest('.owner-row');
+  if (!row) return;
+  const idx = Number(row.dataset.idx);
+  const cls = e.target.className;
+  const o = app.owners[idx] = app.owners[idx] || {};
+  if (cls.includes('owner-name'))  { o.name  = e.target.value; if (idx === 0) { proj.owner   = e.target.value; safeSave(PROJ_KEY, proj); } }
+  if (cls.includes('owner-id'))    { o.id    = e.target.value; }
+  if (cls.includes('owner-phone')) { o.phone = e.target.value; if (idx === 0) { proj.contact = e.target.value; safeSave(PROJ_KEY, proj); } }
+  if (cls.includes('owner-email')) { o.email = e.target.value; }
+  safeSave(APP_KEY, app);
+});
+document.getElementById('add-owner').addEventListener('click', () => {
+  if (app.owners.length >= OWNERS_MAX) { alert(`Permit template supports up to ${OWNERS_MAX} owners.`); return; }
+  app.owners.push({ name: '', id: '', phone: '', email: '' });
+  safeSave(APP_KEY, app);
+  renderOwners();
+});
+
+// ---------- Professionals (collapsible extras) ----------
+const PRO_ROLES = [
+  { key: 'lic_architect',  label: 'Licensed Architect',   pdf: 'Arch' },
+  { key: 'arch_checker',   label: 'Architectural Checker', pdf: 'ArchChk' },
+  { key: 'arch_field',     label: 'Architectural field',   pdf: 'Arch Field' },
+  { key: 'lic_engineer',   label: 'Licensed Engineer',     pdf: 'Str' },
+  { key: 'struct_checker', label: 'Structural Checker',    pdf: 'StrChk' },
+  { key: 'civil_field',    label: 'Civil field',           pdf: 'Str Field' },
+];
+const prosTbody = document.querySelector('#pros-ext-table tbody');
+prosTbody.innerHTML = PRO_ROLES.map((r) => {
+  const d = proj.pro_details[r.key] || {};
+  return `
+  <tr class="pro-row" data-role="${r.key}">
+    <td><button type="button" class="pro-toggle" style="background:transparent; border:1px solid var(--line-strong); border-radius:4px; width:22px; height:22px; cursor:pointer; color:var(--ink-soft); font:inherit; font-size:11px;">▸</button></td>
+    <td>${r.label}</td>
+    <td><input type="text" data-key="${r.key}_name"  data-store="proj" value="${(proj[r.key + '_name']  || '').replace(/"/g,'&quot;')}"></td>
+    <td><input type="text" data-key="${r.key}_regno" data-store="proj" value="${(proj[r.key + '_regno'] || '').replace(/"/g,'&quot;')}"></td>
+  </tr>
+  <tr class="pro-more" data-role="${r.key}" hidden>
+    <td></td>
+    <td colspan="3">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Address<input type="text" class="pro-ext" data-role="${r.key}" data-field="address" value="${(d.address || '').replace(/"/g,'&quot;')}"></label>
+        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">ID card number<input type="text" class="pro-ext" data-role="${r.key}" data-field="id" value="${(d.id || '').replace(/"/g,'&quot;')}"></label>
+        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Phone<input type="text" class="pro-ext" data-role="${r.key}" data-field="phone" value="${(d.phone || '').replace(/"/g,'&quot;')}"></label>
+        <label style="display:flex; flex-direction:column; gap:3px; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); font-weight:600;">Email<input type="text" class="pro-ext" data-role="${r.key}" data-field="email" value="${(d.email || '').replace(/"/g,'&quot;')}"></label>
+      </div>
+    </td>
+  </tr>`;
+}).join('');
+// Wire the newly-injected name/regno inputs into the proj store
+prosTbody.querySelectorAll('input[data-key][data-store="proj"]').forEach((el) => {
+  const k = el.dataset.key;
+  el.addEventListener('input', () => { proj[k] = el.value; safeSave(PROJ_KEY, proj); });
+});
+prosTbody.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pro-toggle');
+  if (!btn) return;
+  const role = btn.closest('tr').dataset.role;
+  const more = prosTbody.querySelector(`tr.pro-more[data-role="${role}"]`);
+  const open = more.hidden;
+  more.hidden = !open;
+  btn.textContent = open ? '▾' : '▸';
+});
+prosTbody.addEventListener('input', (e) => {
+  const inp = e.target.closest('.pro-ext');
+  if (!inp) return;
+  proj.pro_details[inp.dataset.role] = proj.pro_details[inp.dataset.role] || {};
+  proj.pro_details[inp.dataset.role][inp.dataset.field] = inp.value;
+  safeSave(PROJ_KEY, proj);
 });
 
 // ---------- Floor-use matrix ----------
@@ -348,12 +471,25 @@ fuTable.addEventListener('input', (e) => {
 window.addEventListener('storage', (e) => {
   if (e.key === PROJ_KEY) {
     proj = safeLoad(PROJ_KEY);
+    proj.pro_details = proj.pro_details || {};
     stores.proj = proj;
     document.querySelectorAll('#app-form [data-store="proj"]').forEach((el) => {
       const k = el.dataset.key;
       if (document.activeElement === el) return; // don't clobber what the user is typing
       el.value = proj[k] ?? "";
     });
+    // Re-render pro extras rows so address/id/phone/email reflect updated proj.pro_details
+    prosTbody.querySelectorAll('.pro-ext').forEach((inp) => {
+      if (document.activeElement === inp) return;
+      inp.value = (proj.pro_details[inp.dataset.role] || {})[inp.dataset.field] || '';
+    });
+    // Keep owner 1's shared fields in sync
+    if (app.owners[0]) {
+      if (document.activeElement && document.activeElement.classList.contains('owner-name')  && Number(document.activeElement.closest('.owner-row').dataset.idx) === 0) {} else { app.owners[0].name  = proj.owner   || app.owners[0].name; }
+      if (document.activeElement && document.activeElement.classList.contains('owner-phone') && Number(document.activeElement.closest('.owner-row').dataset.idx) === 0) {} else { app.owners[0].phone = proj.contact || app.owners[0].phone; }
+      safeSave(APP_KEY, app);
+      renderOwners();
+    }
   }
 });
 
@@ -361,13 +497,14 @@ window.addEventListener('storage', (e) => {
 document.getElementById('reset').addEventListener('click', () => {
   if (!confirm('Clear the Application Form-only fields? Fields shared with the Checklist stay.')) return;
   app = {};
-  safeSave(APP_KEY, app);
-  stores.app = app;
+  app.owners = [{ name: proj.owner || "", id: "", phone: proj.contact || "", email: "" }];
   app.floor_uses = {};
   app.active_floors = ["GF", "1F"];
+  safeSave(APP_KEY, app);
+  stores.app = app;
   document.querySelectorAll('#app-form [data-store="app"]').forEach((el) => { el.value = ""; });
   document.querySelectorAll('#app-form [data-cb]').forEach((el) => { el.checked = false; });
-  renderFuChips(); renderFuTable();
+  renderOwners(); renderFuChips(); renderFuTable();
 });
 
 // ---------- PDF generation ----------
@@ -480,7 +617,24 @@ async function fillPermitPdf() {
     }
   };
 
-  const owners = (proj.owner || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+  const owners = (app.owners || []).slice(0, 7);
+  const proDetails = proj.pro_details || {};
+  const PRO_PDF = {
+    lic_architect:  'Arch',
+    arch_checker:   'ArchChk',
+    arch_field:     'Arch Field',
+    lic_engineer:   'Str',
+    struct_checker: 'StrChk',
+    civil_field:    'Str Field',
+  };
+  const hasProDetails = (role) => {
+    const d = proDetails[role] || {};
+    return !!(proj[role + '_name'] || proj[role + '_regno'] || d.address || d.id || d.phone || d.email);
+  };
+  const archSideFilled   = ['lic_architect', 'arch_checker', 'arch_field'].some(hasProDetails);
+  const structSideFilled = ['lic_engineer', 'struct_checker', 'civil_field'].some(hasProDetails);
+  const ownersFilled     = owners.some((o) => (o.name || "").trim());
+  const sharedDate = proj.signed_date ? toDDMMYYYY(proj.signed_date) : "";
 
   const map = {
     // Section 1 — Project info
@@ -496,25 +650,28 @@ async function fillPermitPdf() {
     "Permit Number":  app.previous_permit_number,
     "Permit Date":    toDDMMYYYY(app.previous_permit_issue_date),
     "Other Details":  app.previous_permit_details,
-    // Section 6 — Architectural professionals
-    "Arch Registered Name":          proj.lic_architect_name,
-    "Arch Registered RegNo":         proj.lic_architect_regno,
-    "ArchChk Registered Name":       proj.arch_checker_name,
-    "ArchChk Registered RegNo":      proj.arch_checker_regno,
-    "Arch Field Registered Name":    proj.arch_field_name,
-    "Arch Field Registered RegNo":   proj.arch_field_regno,
-    // Section 7 — Structural professionals
-    "Str Registered Name":           proj.lic_engineer_name,
-    "Str Registered RegNo":          proj.lic_engineer_regno,
-    "StrChk Registered Name":        proj.struct_checker_name,
-    "StrChk Registered RegNo":       proj.struct_checker_regno,
-    "Str Field Registered Name":     proj.civil_field_name,
-    "Str Field Registered RegNo":    proj.civil_field_regno,
-    // Shared signed-on date
-    "Date": todayDDMMYYYY(),
+    // Section dates — only when the matching section has content
+    "Date1": archSideFilled   ? sharedDate : "",
+    "Date2": structSideFilled ? sharedDate : "",
+    "Date":  ownersFilled     ? sharedDate : "",
   };
+  // Professional details (name, regno, address, id, phone, email) per role
+  for (const [role, pdf] of Object.entries(PRO_PDF)) {
+    const d = proDetails[role] || {};
+    map[`${pdf} Registered Name`]    = proj[role + '_name']  || '';
+    map[`${pdf} Registered RegNo`]   = proj[role + '_regno'] || '';
+    map[`${pdf} Registered Address`] = d.address || '';
+    map[`${pdf} Registered ID`]      = d.id || '';
+    map[`${pdf} Registered Number`]  = d.phone || '';
+    map[`${pdf} Registered Email`]   = d.email || '';
+  }
   // Owners 1..7
-  owners.slice(0, 7).forEach((name, i) => { map[`Owner ${i + 1} Name`] = name; });
+  owners.forEach((o, i) => {
+    map[`Owner ${i + 1} Name`]   = o.name || '';
+    map[`Owner ${i + 1} ID`]     = o.id || '';
+    map[`Owner ${i + 1} Number`] = o.phone || '';
+    map[`Owner ${i + 1} Email`]  = o.email || '';
+  });
 
   // Floor-use text fields (Other uses per floor)
   Object.entries(app.floor_uses || {}).forEach(([code, uses]) => {

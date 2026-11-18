@@ -260,8 +260,9 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
     <div class="proj-grid">
       <label class="full">Island / Lot name<input type="text" data-key="island_lot_name"></label>
       <label>Atoll / Island<input type="text" data-key="atoll_island"></label>
-      <label class="full">Owner(s) <small style="text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">— one name per line</small><textarea data-key="owner" rows="3" style="width:100%; padding:8px 10px; border:1px solid var(--line-strong); background:var(--panel); color:var(--ink); border-radius:6px; font:inherit; resize:vertical;"></textarea></label>
-      <label>Contact number<input type="text" data-key="contact"></label>
+      <label class="full">Plot owner <small style="text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">— first plot owner; add co-owners on the Application Form</small><input type="text" data-key="owner"></label>
+      <label>Contact number <small style="text-transform:none; letter-spacing:0; color:var(--muted); font-weight:400;">— plot owner's phone</small><input type="text" data-key="contact"></label>
+      <label>Date signed<input type="date" data-key="signed_date"></label>
       <label>Type of building<select data-key="building_use"><option value="">Select…</option><option>Residential</option><option>Mix-Residential</option><option>Office</option><option>Commercial</option><option>Industrial</option></select></label>
     </div>
   </div>
@@ -288,7 +289,6 @@ body.has-panel { padding-right: var(--panel-w); transition: padding-right 0.25s 
       <thead><tr><th>Role</th><th>Name</th><th>Reg. / R.S. No.</th><th style="width:28px;"></th></tr></thead>
       <tbody>
         <tr data-role="arch_checker"><td>Architectural Checker</td><td><input type="text" data-key="arch_checker_name" list="roster-arch_checker"></td><td><input type="text" data-key="arch_checker_regno"></td><td><button type="button" class="save-roster" title="Save to roster">☆</button></td></tr>
-        <tr><td>Architectural Checker date</td><td colspan="2"><input type="date" data-key="arch_checker_date"></td><td></td></tr>
         <tr data-role="struct_checker"><td>Structural Checker</td><td><input type="text" data-key="struct_checker_name" list="roster-struct_checker"></td><td><input type="text" data-key="struct_checker_regno"></td><td><button type="button" class="save-roster" title="Save to roster">☆</button></td></tr>
         <tr data-role="lic_architect"><td>Licensed Architect</td><td><input type="text" data-key="lic_architect_name" list="roster-lic_architect"></td><td><input type="text" data-key="lic_architect_regno"></td><td><button type="button" class="save-roster" title="Save to roster">☆</button></td></tr>
         <tr data-role="lic_engineer"><td>Licensed Engineer</td><td><input type="text" data-key="lic_engineer_name" list="roster-lic_engineer"></td><td><input type="text" data-key="lic_engineer_regno"></td><td><button type="button" class="save-roster" title="Save to roster">☆</button></td></tr>
@@ -918,6 +918,10 @@ function saveState() { try { localStorage.setItem(STORE_KEY, JSON.stringify(stat
 const PROJ_KEY = "islands-project-details-v1";
 let proj = {};
 try { proj = JSON.parse(localStorage.getItem(PROJ_KEY) || "{}"); } catch(e) { proj = {}; }
+// Migrate legacy multi-line owner textarea → first owner only
+if (typeof proj.owner === "string" && proj.owner.includes("\n")) {
+  proj.owner = proj.owner.split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || "";
+}
 function saveProj() { try { localStorage.setItem(PROJ_KEY, JSON.stringify(proj)); } catch(e) {} }
 document.querySelectorAll('#proj-form input[data-key], #proj-form select[data-key], #proj-form textarea[data-key], #pros-form input[data-key]').forEach((inp) => {
   const k = inp.dataset.key;
@@ -1127,12 +1131,11 @@ document.getElementById("uncheck-all").addEventListener("click", () => {
   document.querySelectorAll(".item .status-select").forEach((select) => { select.value = ""; select.dispatchEvent(new Event("change")); });
 });
 document.getElementById("reset").addEventListener("click", () => {
-  if (!confirm('Clear all checkbox ticks and plot details from this browser?')) return;
-  try { localStorage.removeItem(STORE_KEY); localStorage.removeItem(PROJ_KEY); } catch(e) {}
-  state = {}; proj = {};
+  if (!confirm('Clear all checkbox ticks from this browser? (Plot details and professionals are kept.)')) return;
+  try { localStorage.removeItem(STORE_KEY); } catch(e) {}
+  state = {};
   document.querySelectorAll(".item .status-select, .floor-matrix select").forEach((select) => { select.value = ""; });
   document.querySelectorAll(".item").forEach((row) => applyStatusClass(row, ""));
-  document.querySelectorAll('#proj-form input, #proj-form select, #proj-form textarea, #pros-form input').forEach((inp) => { inp.value = ""; });
   updateProgress();
 });
 
@@ -1238,18 +1241,27 @@ async function buildCertificatePdf() {
   const Ti = await doc.embedFont(StandardFonts.TimesRomanItalic);
   const Tbi = await doc.embedFont(StandardFonts.TimesRomanBoldItalic);
   const black = rgb(0, 0, 0);
-  const draw = (text, x, y, opts = {}) => page.drawText(String(text ?? ""), { x, y, size: opts.size || 11, font: opts.font || T, color: black });
+  const INK = rgb(7/255, 50/255, 255/255);
+  const draw = (text, x, y, opts = {}) => page.drawText(String(text ?? ""), { x, y, size: opts.size || 11, font: opts.font || T, color: opts.color || black });
+  const drawVal = (text, x, y, opts = {}) => {
+    if (!text) return;
+    page.drawText(String(text).toUpperCase(), { x, y, size: opts.size || 11, font: opts.font || Ti, color: INK });
+  };
   const GAP = T.widthOfTextAtSize(" ", 11);
 
   // Title + subtitle
-  draw("ARCHITECTURAL CHECKER’S CERTIFCATE", 144.3, 766, { size: 14, font: Tb });
+  (() => {
+    const title = "ARCHITECTURAL CHECKER’S CERTIFICATE";
+    const w = Tb.widthOfTextAtSize(title, 14);
+    draw(title, (595.25 - w) / 2, 766, { size: 14, font: Tb });
+  })();
   draw("For architectural design compliance - category B1", 169.6, 739.2, { size: 12, font: Tb });
 
   // Clause 1
   draw("1.", 90, 703.5);
   draw("I, ", 108, 703.5);
-  const archName = proj.arch_checker_name || "";
-  draw(archName, 119.55, 703.5, { font: Tbi });
+  const archName = (proj.arch_checker_name || "").toUpperCase();
+  drawVal(archName, 119.55, 703.5, { font: Tbi });
   const archW = Tbi.widthOfTextAtSize(archName, 11);
   draw(" being a registered checker, hereby certifies that I have in", 119.55 + archW, 703.5);
   draw("accordance with Male’ Planning Regulation and other applicable regulations relevant to", 108, 684.5);
@@ -1280,42 +1292,25 @@ async function buildCertificatePdf() {
   draw(specifyPrefix + ".".repeat(dotCount), 143.8, 380.4, { font: Ti });
 
   // Field helper: value one space after the colon
-  function field(labelText, labelX, y, valueText, labelFont = T, valueFont = Tbi) {
+  function field(labelText, labelX, y, valueText, labelFont = T) {
     const normalized = labelText.replace(/\s*:\s*$/, ":");
     draw(normalized, labelX, y, { font: labelFont });
     const lw = labelFont.widthOfTextAtSize(normalized, 11);
-    if (valueText) draw(valueText, labelX + lw + GAP, y, { font: valueFont });
+    if (valueText) drawVal(valueText, labelX + lw + GAP, y, { font: Tbi });
   }
+  const signedDateFormatted = proj.signed_date ? (() => {
+    const m = proj.signed_date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return "";
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return `${m[3]}-${months[parseInt(m[2],10)-1]}-${m[1]}`;
+  })() : "";
   field("Plot Name/No :", 72, 345.1, proj.island_lot_name);
   field("Name of Architect:", 310.6, 345.1, proj.arch_checker_name);
   field("City/Atoll/Island:", 72, 316.1, proj.atoll_island);
-  field("Date:", 310.6, 316.1, todayDDMMMYYYY());
+  field("Date:", 310.6, 316.1, signedDateFormatted);
   field("Type of Building (use):", 72, 287.1, proj.building_use);
   field("Checker’s Reg. Number :", 310.6, 287.1, proj.arch_checker_regno, Ti);
-
-  // Owner(s): split on newlines, join with ", ", wrap. First line sits after label; wraps anchor to x=72.
-  {
-    const owners = (proj.owner || "").split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-    const labelText = "Plot Owner’s Name :";
-    draw(labelText, 72, 258.1, { font: Ti });
-    const lw = Ti.widthOfTextAtSize(labelText, 11);
-    const valueX = 72 + lw + GAP;
-    const maxX = 305;
-    const lineH = 13;
-    if (owners.length) {
-      const joined = owners.join(", ");
-      const words = joined.split(" ");
-      let line = "", y = 258.1, lineNum = 0;
-      const limit = () => lineNum === 0 ? (maxX - valueX) : (maxX - 72);
-      const startX = () => lineNum === 0 ? valueX : 72;
-      for (const w of words) {
-        const trial = line ? line + " " + w : w;
-        if (Tbi.widthOfTextAtSize(trial, 11) <= limit()) line = trial;
-        else { draw(line, startX(), y, { font: Tbi }); y -= lineH; lineNum++; line = w; }
-      }
-      if (line) draw(line, startX(), y, { font: Tbi });
-    }
-  }
+  field("Plot Owner’s Name :", 72, 258.1, proj.owner, Ti);
   draw("Checker’s Signature:", 310.6, 258.1, { font: Ti });
 
   // Stamp label block
