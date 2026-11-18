@@ -398,7 +398,7 @@ async function fillPermitPdf() {
   const form = doc.getForm();
   const italic = await doc.embedFont(PDFLib.StandardFonts.HelveticaOblique);
   const bold = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-  const INK = PDFLib.rgb(0.11, 0.23, 0.36);
+  const INK = PDFLib.rgb(7/255, 50/255, 255/255);
 
   // Build widget → {page, rect} map by matching each page's /Annots by Rect
   const pages = doc.getPages();
@@ -469,9 +469,14 @@ async function fillPermitPdf() {
       const loc = widgetLoc(w);
       if (!loc) continue;
       const rectW = loc.x2 - loc.x1, rectH = loc.y2 - loc.y1;
-      const size = Math.min(rectW, rectH) * 0.95;
-      // Draw an X across the box
-      loc.page.drawText('X', { x: loc.x1 + rectW * 0.15, y: loc.y1 + rectH * 0.1, size, font: bold, color: INK });
+      // Draw a checkmark as two strokes: short down-stroke then long up-stroke
+      const thickness = Math.max(1, Math.min(rectW, rectH) * 0.14);
+      const pad = Math.min(rectW, rectH) * 0.15;
+      const left = loc.x1 + pad, right = loc.x2 - pad;
+      const bottom = loc.y1 + pad, top = loc.y2 - pad;
+      const mid = { x: left + (right - left) * 0.35, y: bottom + (top - bottom) * 0.1 };
+      loc.page.drawLine({ start: { x: left,  y: bottom + (top - bottom) * 0.5 }, end: mid,                                     thickness, color: INK, lineCap: PDFLib.LineCapStyle.Round });
+      loc.page.drawLine({ start: mid,                                             end: { x: right, y: top },                   thickness, color: INK, lineCap: PDFLib.LineCapStyle.Round });
     }
   };
 
